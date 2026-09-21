@@ -1,0 +1,209 @@
+{
+  "generatedAt": "2026-09-21T11:57:38.286Z",
+  "exam": {
+    "title": "Claude Certified Architect (Foundations)",
+    "code": "CCAR-F",
+    "questions": 60,
+    "minutes": 120,
+    "price": "$125",
+    "passMark": "720/1000",
+    "validMonths": 12
+  },
+  "domains": [
+    {
+      "num": 1,
+      "slug": "1-agentic-architecture",
+      "weight": 27,
+      "title": "Agentic Architecture & Orchestration",
+      "description": "Design and implement agentic systems using Claude's API, including loop management, orchestration patterns, guardrails, and the Claude Agent SDK.",
+      "tasks": [
+        {
+          "num": "1.1",
+          "title": "Agentic Loops",
+          "url": "https://claudecertificationguide.com/learn/1-agentic-architecture/1-1-agentic-loops"
+        },
+        {
+          "num": "1.2",
+          "title": "Multi-Agent Orchestration",
+          "url": "https://claudecertificationguide.com/learn/1-agentic-architecture/1-2-orchestration-patterns"
+        },
+        {
+          "num": "1.3",
+          "title": "Subagent Invocation and Context Passing",
+          "url": "https://claudecertificationguide.com/learn/1-agentic-architecture/1-3-subagent-invocation-context"
+        },
+        {
+          "num": "1.4",
+          "title": "Workflow Enforcement and Handoff",
+          "url": "https://claudecertificationguide.com/learn/1-agentic-architecture/1-4-workflow-enforcement-handoff"
+        },
+        {
+          "num": "1.5",
+          "title": "Agent SDK Hooks",
+          "url": "https://claudecertificationguide.com/learn/1-agentic-architecture/1-5-agent-sdk-hooks"
+        },
+        {
+          "num": "1.6",
+          "title": "Task Decomposition Strategies",
+          "url": "https://claudecertificationguide.com/learn/1-agentic-architecture/1-6-task-decomposition"
+        },
+        {
+          "num": "1.7",
+          "title": "Session State and Resumption",
+          "url": "https://claudecertificationguide.com/learn/1-agentic-architecture/1-7-session-state-resumption"
+        }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "2-tool-design-mcp",
+      "weight": 18,
+      "title": "Tool Design & MCP Integration",
+      "description": "Design effective tool schemas, implement MCP servers and clients, and integrate external services into Claude-powered applications.",
+      "tasks": [
+        {
+          "num": "2.1",
+          "title": "Tool Interface Design",
+          "url": "https://claudecertificationguide.com/learn/2-tool-design-mcp/2-1-tool-schema-design"
+        },
+        {
+          "num": "2.2",
+          "title": "Structured Error Responses",
+          "url": "https://claudecertificationguide.com/learn/2-tool-design-mcp/2-2-structured-error-responses"
+        },
+        {
+          "num": "2.3",
+          "title": "Tool Distribution & Tool Choice",
+          "url": "https://claudecertificationguide.com/learn/2-tool-design-mcp/2-3-tool-distribution-choice"
+        },
+        {
+          "num": "2.4",
+          "title": "MCP Server Integration",
+          "url": "https://claudecertificationguide.com/learn/2-tool-design-mcp/2-4-mcp-server-integration"
+        },
+        {
+          "num": "2.5",
+          "title": "Built-in Tools",
+          "url": "https://claudecertificationguide.com/learn/2-tool-design-mcp/2-5-built-in-tools"
+        }
+      ]
+    },
+    {
+      "num": 3,
+      "slug": "3-claude-code-config",
+      "weight": 20,
+      "title": "Claude Code Configuration & Workflows",
+      "description": "Configure Claude Code for development workflows, manage settings, hooks, permissions, and integrate with CI/CD pipelines.",
+      "tasks": [
+        {
+          "num": "3.1",
+          "title": "CLAUDE.md Hierarchy, Scoping, and Modular Organisation",
+          "url": "https://claudecertificationguide.com/learn/3-claude-code-config/3-1-claude-md-hierarchy"
+        },
+        {
+          "num": "3.2",
+          "title": "Custom Slash Commands and Skills",
+          "url": "https://claudecertificationguide.com/learn/3-claude-code-config/3-2-slash-commands-skills"
+        },
+        {
+          "num": "3.3",
+          "title": "Path-Specific Rules for Conditional Convention Loading",
+          "url": "https://claudecertificationguide.com/learn/3-claude-code-config/3-3-path-specific-rules"
+        },
+        {
+          "num": "3.4",
+          "title": "Plan Mode vs Direct Execution",
+          "url": "https://claudecertificationguide.com/learn/3-claude-code-config/3-4-plan-mode-execution"
+        },
+        {
+          "num": "3.5",
+          "title": "Iterative Refinement Techniques",
+          "url": "https://claudecertificationguide.com/learn/3-claude-code-config/3-5-iterative-refinement"
+        },
+        {
+          "num": "3.6",
+          "title": "CI/CD Integration",
+          "url": "https://claudecertificationguide.com/learn/3-claude-code-config/3-6-cicd-integration"
+        }
+      ]
+    },
+    {
+      "num": 4,
+      "slug": "4-prompt-engineering",
+      "weight": 20,
+      "title": "Prompt Engineering & Structured Output",
+      "description": "Craft effective prompts, implement structured output patterns, and apply prompt engineering techniques for production Claude applications.",
+      "tasks": [
+        {
+          "num": "4.1",
+          "title": "System Prompts with Explicit Criteria",
+          "url": "https://claudecertificationguide.com/learn/4-prompt-engineering/4-1-system-prompts"
+        },
+        {
+          "num": "4.2",
+          "title": "Few-Shot Prompting",
+          "url": "https://claudecertificationguide.com/learn/4-prompt-engineering/4-2-few-shot-prompting"
+        },
+        {
+          "num": "4.3",
+          "title": "Structured Output with Tool Use",
+          "url": "https://claudecertificationguide.com/learn/4-prompt-engineering/4-3-structured-output"
+        },
+        {
+          "num": "4.4",
+          "title": "Validation, Retry, and Feedback Loops",
+          "url": "https://claudecertificationguide.com/learn/4-prompt-engineering/4-4-validation-retry-loops"
+        },
+        {
+          "num": "4.5",
+          "title": "Batch Processing Strategies",
+          "url": "https://claudecertificationguide.com/learn/4-prompt-engineering/4-5-batch-processing"
+        },
+        {
+          "num": "4.6",
+          "title": "Multi-Instance and Multi-Pass Review",
+          "url": "https://claudecertificationguide.com/learn/4-prompt-engineering/4-6-multi-pass-review"
+        }
+      ]
+    },
+    {
+      "num": 5,
+      "slug": "5-context-management",
+      "weight": 15,
+      "title": "Context Management & Reliability",
+      "description": "Manage context windows effectively, implement caching strategies, handle long conversations, and build reliable production systems.",
+      "tasks": [
+        {
+          "num": "5.1",
+          "title": "Context Window Management",
+          "url": "https://claudecertificationguide.com/learn/5-context-management/5-1-context-window-management"
+        },
+        {
+          "num": "5.2",
+          "title": "Escalation & Ambiguity Resolution",
+          "url": "https://claudecertificationguide.com/learn/5-context-management/5-2-escalation-ambiguity"
+        },
+        {
+          "num": "5.3",
+          "title": "Error Propagation in Multi-Agent Systems",
+          "url": "https://claudecertificationguide.com/learn/5-context-management/5-3-error-propagation"
+        },
+        {
+          "num": "5.4",
+          "title": "Codebase Exploration & Context Degradation",
+          "url": "https://claudecertificationguide.com/learn/5-context-management/5-4-codebase-exploration"
+        },
+        {
+          "num": "5.5",
+          "title": "Human Review & Confidence Calibration",
+          "url": "https://claudecertificationguide.com/learn/5-context-management/5-5-human-review-calibration"
+        },
+        {
+          "num": "5.6",
+          "title": "Information Provenance & Multi-Source Synthesis",
+          "url": "https://claudecertificationguide.com/learn/5-context-management/5-6-information-provenance"
+        }
+      ]
+    }
+  ]
+}

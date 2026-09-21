@@ -1,0 +1,740 @@
+[
+  {
+    "num": "1.1",
+    "title": "Agentic Loops",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-1-agentic-loops",
+    "domainNum": 1,
+    "traps": [
+      {
+        "trap": "Using response.content[0].type == 'text' to determine loop completion",
+        "why": "Claude can return text alongside tool_use blocks in the same response. Text presence does not indicate completion. The stop_reason field is the authoritative signal."
+      },
+      {
+        "trap": "Setting arbitrary iteration caps (e.g., 'stop after 10 loops') as the primary stopping mechanism",
+        "why": "Iteration caps either cut off useful work or run unnecessary iterations. They are acceptable as a safety net, not as the primary loop control. Use stop_reason instead."
+      },
+      {
+        "trap": "Parsing natural language phrases like 'I'm done' or 'task complete' to decide loop termination",
+        "why": "Natural language is ambiguous and unreliable. The stop_reason field provides a deterministic, unambiguous signal for loop control."
+      },
+      {
+        "trap": "Forcing tool_choice to 'any' to prevent the agent from returning text",
+        "why": "This forces tool use even when the agent is genuinely finished, creating an infinite loop. The correct approach is to let the model signal completion naturally via stop_reason."
+      }
+    ]
+  },
+  {
+    "num": "1.2",
+    "title": "Multi-Agent Orchestration",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-2-orchestration-patterns",
+    "domainNum": 1,
+    "traps": [
+      {
+        "trap": "Blaming downstream subagents for coverage gaps when the coordinator's task decomposition was too narrow",
+        "why": "Subagents research what they are assigned. If the coordinator only assigns solar and wind as subtopics for renewable energy, no subagent can cover geothermal or tidal. Trace failures to their origin — the coordinator's decomposition."
+      },
+      {
+        "trap": "Assuming subagents share memory or inherit the coordinator's conversation history",
+        "why": "Subagents have completely isolated context. They do not automatically inherit anything from the coordinator. Every piece of information must be explicitly passed in the subagent's prompt."
+      },
+      {
+        "trap": "Proposing direct inter-subagent communication as an efficiency improvement",
+        "why": "Direct communication breaks observability, consistent error handling, and controlled information flow. All communication must flow through the coordinator, regardless of perceived efficiency gains."
+      },
+      {
+        "trap": "Adding more subagents to fix a decomposition problem",
+        "why": "If the coordinator decomposes a topic too narrowly, adding more subagents does not help — they will receive equally narrow assignments. The fix is improving the coordinator's decomposition logic."
+      }
+    ]
+  },
+  {
+    "num": "1.3",
+    "title": "Subagent Invocation and Context Passing",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-3-subagent-invocation-context",
+    "domainNum": 1,
+    "traps": [
+      {
+        "trap": "Assuming subagents automatically have access to the coordinator's conversation history or other subagents' outputs",
+        "why": "Subagents have isolated context. Every piece of information they need must be explicitly included in their prompt by the coordinator. There is no automatic context inheritance."
+      },
+      {
+        "trap": "Blaming the synthesis agent for missing citations when the real issue is context passing without metadata",
+        "why": "The synthesis agent can only cite sources it has been given. If the coordinator passes content without source URLs and document names, the synthesis agent literally cannot produce citations."
+      },
+      {
+        "trap": "Proposing sequential subagent invocation for tasks that can run independently",
+        "why": "Sequential invocation introduces unnecessary latency. Independent tasks should be spawned in parallel using multiple Task tool calls in a single coordinator response."
+      },
+      {
+        "trap": "Confusing fork_session with --resume",
+        "why": "fork_session branches: it starts a new session from a copy of the original's history. --resume appends: it continues the same session. In the SDK the fork flag is set beside resume, so the choice is append or branch, not two different commands. Fork to compare approaches, resume to carry on with the same work."
+      }
+    ]
+  },
+  {
+    "num": "1.4",
+    "title": "Workflow Enforcement and Handoff",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-4-workflow-enforcement-handoff",
+    "domainNum": 1,
+    "traps": [
+      {
+        "trap": "Enhanced system prompt instructions as the fix for high-stakes compliance failures",
+        "why": "If the current prompt already instructs the correct workflow but fails 8% of the time, a stronger prompt might reduce failures to 3-4% but will never reach 0%. Financial, security, and compliance operations require programmatic enforcement for deterministic guarantees."
+      },
+      {
+        "trap": "Few-shot examples as sufficient for guaranteed compliance",
+        "why": "Few-shot examples improve model behaviour but are still probabilistic. They cannot provide the 100% enforcement required for financial and compliance operations. Use programmatic prerequisite gates."
+      },
+      {
+        "trap": "Routing classifiers proposed to fix per-agent compliance issues",
+        "why": "A routing classifier determines which agent handles a request. The compliance failure occurs within the agent execution sequence, not at the routing level. Classifiers handle routing, not per-agent workflow enforcement."
+      },
+      {
+        "trap": "Handoff summaries that omit critical fields like customer ID or recommended action",
+        "why": "Human agents do not have access to the conversation transcript. The handoff summary must be self-contained with all required fields: customer ID, conversation summary, root cause analysis, refund amount, and recommended action."
+      }
+    ]
+  },
+  {
+    "num": "1.5",
+    "title": "Agent SDK Hooks",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-5-agent-sdk-hooks",
+    "domainNum": 1,
+    "traps": [
+      {
+        "trap": "Using PostToolUse hooks to block policy-violating actions",
+        "why": "PostToolUse hooks run after tool execution. By the time the hook fires, the non-compliant action has already been processed. Use PreToolUse hooks (pre-execution) to block actions before they happen."
+      },
+      {
+        "trap": "Enhanced prompt instructions as the solution for 100% compliance requirements",
+        "why": "Prompts provide probabilistic compliance. If the business requires 100% enforcement (financial operations, regulatory compliance, security checks), only hooks provide deterministic guarantees."
+      },
+      {
+        "trap": "Suggesting model-side data transformation instead of PostToolUse hooks for normalisation",
+        "why": "Relying on the model to normalise heterogeneous data formats introduces inconsistency. PostToolUse hooks ensure clean, consistent data reaches the model every time, regardless of which tool produced it."
+      },
+      {
+        "trap": "Confusing the direction of hooks — PostToolUse runs after execution, PreToolUse runs before",
+        "why": "PostToolUse transforms results after a tool runs. PreToolUse blocks or modifies calls before a tool runs. Using the wrong hook direction means either missing the opportunity to prevent an action or unnecessarily blocking completed work."
+      }
+    ]
+  },
+  {
+    "num": "1.6",
+    "title": "Task Decomposition Strategies",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-6-task-decomposition",
+    "domainNum": 1,
+    "traps": [
+      {
+        "trap": "Suggesting a more powerful model or larger context window as the fix for attention dilution",
+        "why": "Attention dilution is an architectural problem, not a model capability problem. Processing too many items in a single pass produces inconsistent depth regardless of model power or context size. The fix is multi-pass architecture."
+      },
+      {
+        "trap": "Proposing a single-pass review with better prompts as equivalent to multi-pass architecture",
+        "why": "Better prompts improve average quality but do not solve the fundamental attention allocation problem. Multi-pass architecture ensures each item receives dedicated attention, which a single-pass approach cannot guarantee."
+      },
+      {
+        "trap": "Applying fixed pipelines to open-ended investigation tasks",
+        "why": "Open-ended tasks require adaptability. Fixed pipelines cannot respond to unexpected findings. Dynamic adaptive decomposition is the correct pattern when the full scope is unknown at the start."
+      },
+      {
+        "trap": "Batching files into groups without adding a cross-file integration pass",
+        "why": "Batching reduces attention dilution within each batch but misses cross-batch issues. Without a dedicated cross-file integration pass, data flow issues and pattern inconsistencies across batches go undetected."
+      }
+    ]
+  },
+  {
+    "num": "1.7",
+    "title": "Session State and Resumption",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-7-session-state-resumption",
+    "domainNum": 1,
+    "traps": [
+      {
+        "trap": "Suggesting full re-exploration of a 50-file codebase when only 3 files changed",
+        "why": "Full re-exploration is wasteful. Inform the agent about the specific 3 files that changed for targeted re-analysis. The prior summary covers everything else."
+      },
+      {
+        "trap": "Recommending --resume after files have been modified",
+        "why": "Resuming preserves stale tool results in the conversation history. The agent may reason from outdated file contents, leading to contradictory advice. A fresh start with summary injection avoids this."
+      },
+      {
+        "trap": "Confusing fork_session with --resume",
+        "why": "fork_session starts a new session from a copy of the existing history, so the original is left as it was. --resume appends to the same session. Fork for divergence, resume for continuation. In the SDK fork_session is set beside resume, so the choice is append or branch, not one option or the other."
+      },
+      {
+        "trap": "Using fork_session to handle stale context after file changes",
+        "why": "fork_session branches from the existing session, which still contains stale tool results. The fork inherits the stale context. A fresh start with summary injection is the correct approach for stale data."
+      }
+    ]
+  },
+  {
+    "num": "2.1",
+    "title": "Tool Interface Design",
+    "domainSlug": "2-tool-design-mcp",
+    "taskSlug": "2-1-tool-schema-design",
+    "domainNum": 2,
+    "traps": [
+      {
+        "trap": "Choosing few-shot examples to fix tool misrouting caused by minimal descriptions",
+        "why": "Few-shot examples add token overhead without addressing the root cause. The model is confused because descriptions do not differentiate the tools — fix the descriptions first."
+      },
+      {
+        "trap": "Implementing a routing classifier as the first step to fix tool selection",
+        "why": "A routing classifier is over-engineered as a first response. It bypasses the LLM's natural language understanding and adds infrastructure the exam does not consider proportionate."
+      },
+      {
+        "trap": "Consolidating similar tools into one as the first step",
+        "why": "Tool consolidation is a valid long-term architectural choice, but it requires more effort than expanding descriptions. The exam favours low-effort, high-leverage first steps."
+      },
+      {
+        "trap": "Ignoring system prompt wording after updating tool descriptions",
+        "why": "Keyword-sensitive instructions in system prompts can silently override well-written tool descriptions, creating unintended tool associations."
+      }
+    ]
+  },
+  {
+    "num": "2.2",
+    "title": "Structured Error Responses",
+    "domainSlug": "2-tool-design-mcp",
+    "taskSlug": "2-2-structured-error-responses",
+    "domainNum": 2,
+    "traps": [
+      {
+        "trap": "Retrying when a tool returns an empty result from a successful query",
+        "why": "An empty result from a successful query means 'no data matches your criteria.' Retrying will produce the same empty result. The agent should accept the result and respond accordingly."
+      },
+      {
+        "trap": "Using generic error messages like 'Operation failed' without structured metadata",
+        "why": "Without errorCategory, isRetryable, and a description, the agent cannot distinguish transient failures from business rule violations. It cannot make appropriate recovery decisions."
+      },
+      {
+        "trap": "Treating business errors as retryable",
+        "why": "Business errors (e.g. refund exceeds policy limit) will never resolve through retry. The same policy violation applies every time. The agent must take an alternative path such as escalation."
+      },
+      {
+        "trap": "Marking a validation error isRetryable: true because the agent can recover from it",
+        "why": "isRetryable answers whether resending this exact call can work. A malformed order ID fails the same check every time, so validation is isRetryable: false. The agent still recovers — by correcting the input and issuing a new call — but errorCategory carries that instruction, not the boolean."
+      },
+      {
+        "trap": "Reading isRetryable: false as 'abandon the task'",
+        "why": "Three categories are non-retryable and only two of them are dead ends. Validation is false because the input must change first, and the agent fixes it unaided. Business and permission are the ones that need an alternative path or a different principal."
+      },
+      {
+        "trap": "Silently suppressing subagent errors by returning empty results as success",
+        "why": "This hides failure information from the coordinator, preventing intelligent recovery. The coordinator cannot distinguish 'found nothing' from 'could not search' and may produce incomplete or inaccurate output."
+      }
+    ]
+  },
+  {
+    "num": "2.3",
+    "title": "Tool Distribution & Tool Choice",
+    "domainSlug": "2-tool-design-mcp",
+    "taskSlug": "2-3-tool-distribution-choice",
+    "domainNum": 2,
+    "traps": [
+      {
+        "trap": "Routing all simple verification requests through the coordinator when 85% are simple lookups",
+        "why": "Coordinator round-trips add 2-3 extra hops per request. A scoped verify_fact tool on the synthesis agent handles the 85% simple case directly, cutting latency by up to 40%."
+      },
+      {
+        "trap": "Using tool_choice 'auto' when structured output is required",
+        "why": "With 'auto', the model may return conversational text instead of calling a tool. Use 'any' to guarantee a tool call, or forced selection to guarantee a specific tool call."
+      },
+      {
+        "trap": "Giving an agent 18 tools and expecting reliable selection",
+        "why": "Tool selection reliability degrades as the number of tools increases. The optimal range is 4-5 tools per agent. More tools means more decision complexity and more selection errors."
+      },
+      {
+        "trap": "Giving a subagent a generic fetch_url tool when a constrained load_document would suffice",
+        "why": "Generic tools enable misuse. Constrained alternatives (load_document that validates document URLs only) enforce the principle of least privilege and make the tool's purpose clearer."
+      }
+    ]
+  },
+  {
+    "num": "2.4",
+    "title": "MCP Server Integration",
+    "domainSlug": "2-tool-design-mcp",
+    "taskSlug": "2-4-mcp-server-integration",
+    "domainNum": 2,
+    "traps": [
+      {
+        "trap": "Building a custom MCP server for a standard integration like Jira",
+        "why": "Community MCP servers exist for standard integrations and should be evaluated first. Custom builds are only justified for team-specific workflows that community servers cannot handle."
+      },
+      {
+        "trap": "Putting team-wide MCP server configuration in ~/.claude.json",
+        "why": "~/.claude.json is user-level and personal — it is not version-controlled or shared. Team-wide servers belong in .mcp.json at the project root."
+      },
+      {
+        "trap": "Committing credentials directly in .mcp.json instead of using environment variable expansion",
+        "why": "Credentials in version control are a security risk. Use ${GITHUB_TOKEN} syntax so each developer sets tokens locally and secrets never enter repository history."
+      },
+      {
+        "trap": "Leaving MCP tool descriptions sparse, causing the agent to prefer built-in tools",
+        "why": "The model defaults to tools it understands best. Sparse MCP descriptions lose out to detailed built-in tool descriptions. Enhance MCP descriptions to explain capabilities and outputs fully."
+      }
+    ]
+  },
+  {
+    "num": "2.5",
+    "title": "Built-in Tools",
+    "domainSlug": "2-tool-design-mcp",
+    "taskSlug": "2-5-built-in-tools",
+    "domainNum": 2,
+    "traps": [
+      {
+        "trap": "Using Glob to find function callers (it searches paths, not contents)",
+        "why": "Glob matches file paths by naming pattern. It cannot search inside files for function calls. Use Grep to search file contents for function names, import statements, or error messages."
+      },
+      {
+        "trap": "Using Grep to find files by extension or naming pattern",
+        "why": "While Grep could technically find filenames mentioned in content, Glob is the purpose-built tool for matching file paths. Use Glob for **/*.test.tsx, **/config.*, and similar path-based searches."
+      },
+      {
+        "trap": "Reading all source files upfront before understanding what is relevant",
+        "why": "Loading every file into context is a context-budget killer. The correct approach is incremental: Grep to find entry points, then Read to trace flows from those specific entry points."
+      },
+      {
+        "trap": "Defaulting to Read + Write for every file modification instead of trying Edit first",
+        "why": "Edit is faster and uses less context because it only touches the specific text. Read + Write loads the entire file. Try Edit first. Read + Write is the fallback for when Edit cannot find a unique anchor, not the standard response."
+      },
+      {
+        "trap": "Answering 'widen old_string or set replace_all' when a question asks what to do after Edit reports a non-unique match",
+        "why": "That is what current Claude Code does, and it is the cheaper move in real work. The exam guide names Read + Write as the fallback when Edit cannot find unique anchor text, and every keyed answer follows the guide. Read the full file, then Write the complete modified version."
+      }
+    ]
+  },
+  {
+    "num": "3.1",
+    "title": "CLAUDE.md Hierarchy, Scoping, and Modular Organisation",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-1-claude-md-hierarchy",
+    "domainNum": 3,
+    "traps": [
+      {
+        "trap": "New team member not receiving Claude Code instructions despite working on the same repo and branch",
+        "why": "The instructions are in user-level config (~/.claude/CLAUDE.md) instead of project-level. User-level is not version-controlled or shared via git. Move to .claude/CLAUDE.md for team-wide application."
+      },
+      {
+        "trap": "Thinking /memory triggers configuration loading",
+        "why": "/memory is a diagnostic command that shows which files are loaded. Configuration files load automatically based on their location in the hierarchy. /memory helps you debug — it does not activate anything."
+      },
+      {
+        "trap": "Assuming directory-level CLAUDE.md is the best solution for cross-directory conventions",
+        "why": "Directory-level CLAUDE.md applies to one directory only. For conventions spanning many directories (like test files spread throughout a codebase), use path-specific rules in .claude/rules/ with glob patterns instead."
+      }
+    ]
+  },
+  {
+    "num": "3.2",
+    "title": "Custom Slash Commands and Skills",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-2-slash-commands-skills",
+    "domainNum": 3,
+    "traps": [
+      {
+        "trap": "Creating a flat Markdown file directly inside .claude/skills/ (e.g., .claude/skills/review.md) and expecting a /review command",
+        "why": "The two paths create the same commands but have different file structures. A skill is a directory containing a SKILL.md entrypoint (.claude/skills/review/SKILL.md); a flat .md file only creates a command under .claude/commands/ (.claude/commands/review.md). A loose file dropped straight into .claude/skills/ is not picked up."
+      },
+      {
+        "trap": "Placing a team-shared command in a user-scoped path (~/.claude/commands/ or ~/.claude/skills/) instead of a project-scoped path",
+        "why": "User-scoped paths (~/.claude/commands/ and ~/.claude/skills/) are personal and not version-controlled. Team commands that should be available to everyone on clone must go in a project-scoped path (.claude/skills/ or .claude/commands/) inside the repository. Both project-scoped paths create the same commands; .claude/skills/ is the canonical, fuller-featured location."
+      },
+      {
+        "trap": "Thinking skills behave like CLAUDE.md for always-on guidance",
+        "why": "Skills load on-demand as task-style workflows, not as always-in-context guidance. Claude can auto-invoke a skill when the prompt matches the skill's description (or when a paths-scoped skill matches an edited file), but the skill still loads as a separate invocation-style unit rather than shaping every session by default. CLAUDE.md and .claude/rules/ load automatically into context for every session (or every matching file, for path-scoped rules). If the question asks about always-on conventions that apply to every edit, the answer is CLAUDE.md or .claude/rules/, not a skill."
+      },
+      {
+        "trap": "Not knowing when to use context: fork",
+        "why": "context: fork isolates verbose skill output from the main conversation. Without it, brainstorming or codebase analysis output pollutes the context window. The exam will present scenarios where verbose output clutters the main conversation — the fix is context: fork."
+      },
+      {
+        "trap": "Putting task-specific workflows in CLAUDE.md",
+        "why": "CLAUDE.md is for always-loaded universal standards. Task-specific procedures (code review workflows, analysis routines, brainstorming templates) belong in skills that are invoked on demand."
+      }
+    ]
+  },
+  {
+    "num": "3.3",
+    "title": "Path-Specific Rules for Conditional Convention Loading",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-3-path-specific-rules",
+    "domainNum": 3,
+    "traps": [
+      {
+        "trap": "Choosing directory-level CLAUDE.md over path-specific rules for cross-directory conventions",
+        "why": "When conventions must apply to files spread across 50+ directories (like co-located test files), path-specific rules with glob patterns are correct. Directory-level CLAUDE.md would require placing a file in every directory — a massive maintenance burden."
+      },
+      {
+        "trap": "Placing file-type-specific conventions in root CLAUDE.md",
+        "why": "Root CLAUDE.md loads for every session regardless of which files you edit. Terraform conventions consume tokens when editing React components. Path-specific rules load only when editing matching files, preserving token budget."
+      },
+      {
+        "trap": "Confusing skills with path-specific rules for automatic convention application",
+        "why": "Both skills and .claude/rules/ can auto-activate via a paths frontmatter, but they serve different purposes. Rules stay in context as background guidance — loaded when Claude reads a matching file — so they shape every edit. Skills load on-demand as task-style workflows, triggered either by the model's intent match or by explicit invocation. When the question asks about automatic, always-on convention loading for a file type, path-specific rules are the right answer."
+      }
+    ]
+  },
+  {
+    "num": "3.4",
+    "title": "Plan Mode vs Direct Execution",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-4-plan-mode-execution",
+    "domainNum": 3,
+    "traps": [
+      {
+        "trap": "Defaulting to direct execution for multi-file architectural changes",
+        "why": "Multi-file modifications with multiple valid approaches require plan mode. Direct execution risks costly rework when dependencies are discovered late. If the task involves architectural decisions or affects many files, plan first."
+      },
+      {
+        "trap": "Using plan mode for a single-file bug fix with a clear stack trace",
+        "why": "A single-function fix with a known cause and clear stack trace is the textbook case for direct execution. Plan mode adds unnecessary overhead when the problem, location, and solution are all clear."
+      },
+      {
+        "trap": "Not recognising the plan-then-execute hybrid pattern",
+        "why": "The exam tests whether you know to combine plan mode for investigation with direct execution for implementation. This is the correct approach for tasks like library migrations: plan the strategy, then execute it."
+      },
+      {
+        "trap": "Starting direct execution and switching to plan mode only when complexity emerges",
+        "why": "When complexity is already stated in the requirements (e.g., monolith restructuring), plan mode should be chosen upfront. The complexity is known, not speculative. Do not wait for surprises."
+      }
+    ]
+  },
+  {
+    "num": "3.5",
+    "title": "Iterative Refinement Techniques",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-5-iterative-refinement",
+    "domainNum": 3,
+    "traps": [
+      {
+        "trap": "Choosing to refine prose descriptions when the model interprets them inconsistently",
+        "why": "More precise prose still relies on interpretation. Concrete input/output examples eliminate interpretation ambiguity. The answer to inconsistent interpretation is always examples first, not better prose."
+      },
+      {
+        "trap": "Not recognising when to batch vs sequence feedback",
+        "why": "If issues interact (fixing A affects B), provide all in one message so the model sees all constraints. If issues are independent, fix sequentially. The exam tests this distinction directly."
+      },
+      {
+        "trap": "Confusing the interview pattern with the examples technique",
+        "why": "The interview pattern is for unfamiliar domains where you might miss considerations. Examples are for when you know the exact transformation but the model misinterprets it. Different problems, different solutions."
+      }
+    ]
+  },
+  {
+    "num": "3.6",
+    "title": "CI/CD Integration",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-6-cicd-integration",
+    "domainNum": 3,
+    "traps": [
+      {
+        "trap": "CI pipeline hanging because Claude Code is waiting for interactive input",
+        "why": "The fix is the -p (--print) flag. Not CLAUDE_HEADLESS=true (does not exist), not --batch (does not exist), not stdin redirection. The -p flag is the documented method for non-interactive execution."
+      },
+      {
+        "trap": "Assuming self-review in the same session is as effective as independent review",
+        "why": "The same session retains reasoning context from code generation, making it less likely to question its own decisions. An independent review instance without that context is more effective at finding issues."
+      },
+      {
+        "trap": "Using the Batch API for pre-merge CI checks",
+        "why": "The Message Batches API has up to 24-hour processing time with no latency SLA. Pre-merge checks are blocking workflows where developers wait for results. Use real-time API for blocking checks; batch API for overnight or weekly non-blocking analysis."
+      },
+      {
+        "trap": "Not including prior review findings in subsequent review runs",
+        "why": "Without prior context, each review run analyses from scratch and produces duplicate comments. Include previous findings and instruct Claude to report only new or unaddressed issues to maintain developer trust."
+      }
+    ]
+  },
+  {
+    "num": "4.1",
+    "title": "System Prompts with Explicit Criteria",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-1-system-prompts",
+    "domainNum": 4,
+    "traps": [
+      {
+        "trap": "Choosing 'be conservative' or 'only report high-confidence findings' as valid prompt improvements",
+        "why": "Vague instructions do not improve precision. The model has no actionable interpretation of 'conservative.' Specific categorical criteria defining exactly what to flag and what to skip are the correct approach."
+      },
+      {
+        "trap": "Assuming confidence thresholds fix false positive problems",
+        "why": "LLM self-reported confidence is poorly calibrated. Explicit criteria with concrete code examples produce better results than confidence-based filtering. Confidence routing is useful but only after criteria are defined."
+      },
+      {
+        "trap": "Keeping all review categories active while iterating on high false-positive categories",
+        "why": "High false positive rates in one category destroy trust in ALL categories. Temporarily disabling problematic categories while improving their prompts restores system-wide trust."
+      }
+    ]
+  },
+  {
+    "num": "4.2",
+    "title": "Few-Shot Prompting",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-2-few-shot-prompting",
+    "domainNum": 4,
+    "traps": [
+      {
+        "trap": "Choosing 'add more detailed instructions' when output formatting is inconsistent",
+        "why": "If detailed instructions already exist and output is still inconsistent, adding more instructions will not fix the problem. Few-shot examples demonstrating the exact desired format are more effective for consistency."
+      },
+      {
+        "trap": "Thinking few-shot examples only teach literal pattern-matching",
+        "why": "When examples include reasoning for why decisions were made, they teach the model to generalise to novel patterns. The model learns the decision principle, not just the specific case."
+      },
+      {
+        "trap": "Using confidence thresholds to fix inconsistent judgement calls",
+        "why": "Confidence thresholds are poorly calibrated and do not address the root cause. Few-shot examples showing the correct judgement for ambiguous cases directly teach consistent decision-making."
+      }
+    ]
+  },
+  {
+    "num": "4.3",
+    "title": "Structured Output with Tool Use",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-3-structured-output",
+    "domainNum": 4,
+    "traps": [
+      {
+        "trap": "Believing tool_use with JSON schemas prevents all extraction errors",
+        "why": "tool_use eliminates JSON syntax errors only. Semantic errors — values that do not sum correctly, data placed in wrong fields, fabricated values for missing information — still occur and require separate validation."
+      },
+      {
+        "trap": "Confusing tool_choice 'auto' with 'any'",
+        "why": "'auto' allows the model to return text instead of calling a tool — no guarantee of structured output. 'any' guarantees a tool call but lets the model choose which tool. For guaranteed structured output with unknown document types, use 'any'."
+      },
+      {
+        "trap": "Making all schema fields required to ensure data completeness",
+        "why": "Required fields pressure the model to fabricate values when information is absent from the source. Optional/nullable fields allow honest null responses, which is always preferable to plausible-looking fabricated data."
+      }
+    ]
+  },
+  {
+    "num": "4.4",
+    "title": "Validation, Retry, and Feedback Loops",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-4-validation-retry-loops",
+    "domainNum": 4,
+    "traps": [
+      {
+        "trap": "Assuming retries always work for extraction failures",
+        "why": "Retries fix format mismatches, structural errors, and misplaced values. They cannot produce information genuinely absent from the source document. The exam presents both fixable and unfixable scenarios — you must distinguish them."
+      },
+      {
+        "trap": "Implementing retries without including the specific validation error",
+        "why": "Naive retries without error feedback produce the same mistakes. The model needs to see exactly what went wrong (e.g., 'line items sum to £450 but stated total is £500') to self-correct effectively."
+      },
+      {
+        "trap": "Relying on schema validation alone without semantic checks",
+        "why": "Schema validation (via tool_use) catches syntax errors. Semantic errors — wrong sums, misplaced values, fabricated data — require validation logic and retry loops."
+      },
+      {
+        "trap": "Treating Pydantic as redundant once tool_use enforces a JSON schema",
+        "why": "Schemas eliminate syntax errors but cannot express cross-field semantic rules — sums that must match, dates that must be ordered. Pydantic validators encode those rules and produce the specific, per-field error messages the retry loop feeds back to the model."
+      }
+    ]
+  },
+  {
+    "num": "4.5",
+    "title": "Batch Processing Strategies",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-5-batch-processing",
+    "domainNum": 4,
+    "traps": [
+      {
+        "trap": "Switching all workflows to batch processing for cost savings",
+        "why": "Blocking workflows where developers wait for results (pre-merge checks, real-time reviews) must remain synchronous. The batch API has no guaranteed latency SLA and can take up to 24 hours. Only latency-tolerant workflows should use batch."
+      },
+      {
+        "trap": "Assuming batch results arrive quickly because they often do",
+        "why": "The batch API has no latency SLA. Results often arrive faster than 24 hours, but you cannot design blocking workflows around best-case timing. Design around the 24-hour maximum."
+      },
+      {
+        "trap": "Using batch API for workflows requiring multi-turn tool calling",
+        "why": "The batch API does not support multi-turn tool calling within a single request. If your workflow needs to execute tools and use results mid-processing, you must use the synchronous API."
+      }
+    ]
+  },
+  {
+    "num": "4.6",
+    "title": "Multi-Instance and Multi-Pass Review",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-6-multi-pass-review",
+    "domainNum": 4,
+    "traps": [
+      {
+        "trap": "Choosing self-review in the same session as a viable review strategy",
+        "why": "The model retains its reasoning context from generation and is less likely to question its own decisions. An independent instance without prior context is significantly more effective at catching subtle issues."
+      },
+      {
+        "trap": "Using a single pass for large multi-file reviews",
+        "why": "Single-pass multi-file reviews produce inconsistent depth, miss bugs, and generate contradictory findings due to attention dilution. Split into per-file local passes plus a cross-file integration pass."
+      },
+      {
+        "trap": "Switching to a larger context window model to fix attention dilution",
+        "why": "Larger context windows do not solve attention quality issues. The model can hold more text but still gives uneven attention across files. Focused per-file passes are the correct fix."
+      },
+      {
+        "trap": "Using uncalibrated confidence scores for automated review routing",
+        "why": "Raw self-reported confidence is poorly calibrated. Calibrate thresholds using labelled validation sets before relying on confidence for routing decisions."
+      }
+    ]
+  },
+  {
+    "num": "5.1",
+    "title": "Context Window Management",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-1-context-window-management",
+    "domainNum": 5,
+    "traps": [
+      {
+        "trap": "Thinking progressive summarisation is safe for transactional data",
+        "why": "Summarisation systematically destroys numerical values, dates, and specific identifiers. A persistent case facts block must hold these outside summarised history."
+      },
+      {
+        "trap": "Assuming the 'lost in the middle' effect is solved by telling the model to pay attention to everything",
+        "why": "The fix is structural: place key findings at the beginning of inputs and use explicit section headers. Prompt-based reminders are unreliable for position effects."
+      },
+      {
+        "trap": "Keeping full tool results in context because 'the model might need them later'",
+        "why": "Untrimmed tool results from 40+ field lookups exhaust the token budget across turns. Trim to relevant fields before results enter the conversation history."
+      },
+      {
+        "trap": "Believing conversation history can be selectively truncated without consequences",
+        "why": "The API is stateless. Each request needs complete conversation history. Selective truncation breaks conversational coherence. Use case facts blocks and summarisation instead of truncation."
+      }
+    ]
+  },
+  {
+    "num": "5.2",
+    "title": "Escalation & Ambiguity Resolution",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-2-escalation-ambiguity",
+    "domainNum": 5,
+    "traps": [
+      {
+        "trap": "Sentiment-based escalation seems reasonable but is fundamentally unreliable",
+        "why": "Frustration does not correlate with case complexity. A furious customer with a simple late delivery is easy to resolve. A calm customer with a policy gap needs escalation."
+      },
+      {
+        "trap": "Self-reported confidence scores provide a reliable escalation signal",
+        "why": "LLM self-confidence is poorly calibrated — the model is often incorrectly confident on hard cases and uncertain on easy ones. This is exactly the failure mode the exam tests."
+      },
+      {
+        "trap": "Attempting to resolve before honouring an explicit human request",
+        "why": "When a customer says 'I want a human', escalate immediately. No investigation, no 'let me try first.' This is an absolute rule."
+      },
+      {
+        "trap": "Selecting from ambiguous customer matches using the most recent or most active record",
+        "why": "Heuristic selection risks privacy violations and incorrect actions. The only safe response is to ask for additional identifiers to disambiguate."
+      }
+    ]
+  },
+  {
+    "num": "5.3",
+    "title": "Error Propagation in Multi-Agent Systems",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-3-error-propagation",
+    "domainNum": 5,
+    "traps": [
+      {
+        "trap": "Catching a timeout and returning empty results marked as successful",
+        "why": "Silent suppression prevents all recovery. The coordinator believes the search succeeded and found nothing, so it will never attempt alternatives. This is the worst anti-pattern."
+      },
+      {
+        "trap": "Terminating the entire research pipeline when one subagent times out",
+        "why": "Workflow termination wastes partial results from other subagents that completed successfully. The coordinator should assess the failure and decide on targeted recovery."
+      },
+      {
+        "trap": "Returning a generic 'search unavailable' status after retry exhaustion",
+        "why": "Generic errors hide the query, partial results, and alternative approaches from the coordinator. Structured error context enables informed recovery; generic statuses prevent it."
+      },
+      {
+        "trap": "Retrying a valid empty result because it looks like a failure",
+        "why": "A valid empty result means the query executed successfully and found no matches. This IS the answer. Retrying wastes time and resources on a query that will always return nothing."
+      }
+    ]
+  },
+  {
+    "num": "5.4",
+    "title": "Codebase Exploration & Context Degradation",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-4-codebase-exploration",
+    "domainNum": 5,
+    "traps": [
+      {
+        "trap": "Increasing the context window to solve context degradation",
+        "why": "Context degradation is not about running out of tokens. It is about the model losing track of specific details as verbose output accumulates. A larger window still fills with verbose output."
+      },
+      {
+        "trap": "Assuming subagent delegation is only about parallelisation",
+        "why": "The primary benefit of subagent delegation for codebase exploration is context isolation — keeping the main agent's context clean while subagents handle verbose exploration."
+      },
+      {
+        "trap": "Restarting a session to fix context degradation without saving state",
+        "why": "Restarting loses all accumulated knowledge. Use scratchpad files and state manifests to persist findings before restarting, then inject them into the new session."
+      },
+      {
+        "trap": "Using /compact only when hitting context limits",
+        "why": "/compact should be used proactively during extended sessions to maintain context quality, not just as a last resort when context is exhausted."
+      }
+    ]
+  },
+  {
+    "num": "5.5",
+    "title": "Human Review & Confidence Calibration",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-5-human-review-calibration",
+    "domainNum": 5,
+    "traps": [
+      {
+        "trap": "Using aggregate accuracy (e.g., 97%) to justify automating all high-confidence extractions",
+        "why": "Aggregate metrics hide per-type performance. 97% overall can mean 40% accuracy on specific document types. Validate by document type and field segment before automating."
+      },
+      {
+        "trap": "Only sampling low-confidence extractions for human review",
+        "why": "High-confidence extractions are automated. If a novel error pattern affects them, only stratified random sampling of high-confidence items will detect it."
+      },
+      {
+        "trap": "Using raw model confidence scores without calibration",
+        "why": "Raw confidence scores are not calibrated. 0.90 confidence on dates might mean 94% actual accuracy, while 0.90 on amounts might mean only 82%. Calibrate using labelled validation sets."
+      },
+      {
+        "trap": "Spreading reviewer capacity evenly across all extractions",
+        "why": "Even distribution wastes time on high-confidence items. Prioritise limited reviewer capacity on the highest-uncertainty items where human judgement adds the most value."
+      }
+    ]
+  },
+  {
+    "num": "5.6",
+    "title": "Information Provenance & Multi-Source Synthesis",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-6-information-provenance",
+    "domainNum": 5,
+    "traps": [
+      {
+        "trap": "Selecting the most recent source when two credible sources conflict",
+        "why": "Arbitrarily selecting one value destroys information. Annotate both values with source attribution and publication dates. Let the consumer decide."
+      },
+      {
+        "trap": "Assuming different numbers from different sources are contradictions",
+        "why": "Different publication or data collection dates often explain different numbers. Require dates in structured outputs to enable correct temporal interpretation."
+      },
+      {
+        "trap": "Allowing the synthesis agent to paraphrase without preserving claim-source mappings",
+        "why": "Attribution dies during summarisation. The synthesis agent must explicitly preserve and merge claim-source mappings. Without this, the output is untraceable."
+      },
+      {
+        "trap": "Rendering all content types in a uniform format (all prose, all tables, or all lists)",
+        "why": "Financial data is best as tables, news as prose, technical findings as structured lists. Flattening to a single format degrades readability and comprehension."
+      }
+    ]
+  }
+]

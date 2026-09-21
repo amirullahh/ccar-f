@@ -1,0 +1,50 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# artifact curaction konten (di-generate pakai `npm run content -- --dump-scenarios`)
+/content/_scenarios-dump.md
+
+# artefak tool AI / coding agent — jangan pernah masuk repo
+.codebuddy/
+.freebuff/
+.claude/
+.cursor/
+.windsurf/
+.continue/
+.aider*
+.antigravity/
+.agents/
+AGENTS.md
+CLAUDE.md
+.github/copilot-instructions.md

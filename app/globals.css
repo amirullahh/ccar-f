@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 270 40% 98%;
+    --foreground: 245 45% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 245 45% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 245 45% 10%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 265 40% 94%;
+    --secondary-foreground: 262 60% 30%;
+    --muted: 265 30% 94%;
+    --muted-foreground: 250 12% 42%;
+    --accent: 265 40% 93%;
+    --accent-foreground: 262 60% 30%;
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 160 84% 32%;
+    --success-foreground: 0 0% 100%;
+    --border: 265 30% 88%;
+    --input: 265 30% 88%;
+    --ring: 262 83% 58%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 245 45% 7%;
+    --foreground: 265 40% 96%;
+    --card: 245 38% 11%;
+    --card-foreground: 265 40% 96%;
+    --popover: 245 38% 11%;
+    --popover-foreground: 265 40% 96%;
+    --primary: 262 90% 70%;
+    --primary-foreground: 262 80% 12%;
+    --secondary: 258 32% 18%;
+    --secondary-foreground: 265 50% 88%;
+    --muted: 258 30% 16%;
+    --muted-foreground: 255 15% 64%;
+    --accent: 258 32% 18%;
+    --accent-foreground: 265 50% 88%;
+    --destructive: 0 70% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 160 70% 45%;
+    --success-foreground: 160 90% 8%;
+    --border: 258 28% 20%;
+    --input: 258 28% 20%;
+    --ring: 262 90% 70%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+  }
+  h1, h2, h3 {
+    font-family: Nunito, "Plus Jakarta Sans", system-ui, sans-serif;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Prose tweaks for lesson content */
+.prose-lesson {
+  @apply text-[15.5px] leading-7 text-foreground/90;
+}
+.prose-lesson strong {
+  @apply font-semibold text-foreground;
+}
+.prose-lesson code {
+  @apply rounded-md bg-primary/10 px-1.5 py-0.5 font-mono text-[13px] font-semibold text-primary dark:bg-primary/20;
+}
+.prose-lesson pre {
+  @apply overflow-x-auto rounded-xl border bg-zinc-950 p-4 text-zinc-100;
+}
+.prose-lesson pre code {
+  @apply bg-transparent p-0 text-[13px] text-zinc-100;
+}
+.prose-lesson a {
+  @apply font-medium text-primary underline underline-offset-4;
+}
+.prose-lesson ul {
+  @apply my-3 list-disc space-y-1.5 pl-5;
+}
+.prose-lesson ol {
+  @apply my-3 list-decimal space-y-1.5 pl-5;
+}
+.prose-lesson h3 {
+  @apply mb-2 mt-6 text-lg font-bold tracking-tight;
+}
+.prose-lesson table {
+  @apply my-4 w-full border-collapse text-sm;
+}
+.prose-lesson th {
+  @apply border-b-2 border-border bg-muted/60 px-3 py-2 text-left font-semibold;
+}
+.prose-lesson td {
+  @apply border-b border-border px-3 py-2 align-top;
+}

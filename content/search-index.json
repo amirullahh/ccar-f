@@ -1,0 +1,419 @@
+[
+  {
+    "num": "1.1",
+    "title": "Agentic Loops",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-1-agentic-loops",
+    "domainNum": 1,
+    "traps": [
+      "Using response.content[0].type == 'text' to determine loop completion",
+      "Setting arbitrary iteration caps (e.g., 'stop after 10 loops') as the primary stopping mechanism",
+      "Parsing natural language phrases like 'I'm done' or 'task complete' to decide loop termination",
+      "Forcing tool_choice to 'any' to prevent the agent from returning text"
+    ],
+    "concept": "An agentic loop is the core execution cycle behind every Claude-based agent. It's deterministic control flow, defined in code. Not a prompt trick, not a retry loop, not a chatbot turn. Get this lifecycle right and most of Domain 1 falls into place; get it wrong and your agent stops halfway through a task in production."
+  },
+  {
+    "num": "1.2",
+    "title": "Multi-Agent Orchestration",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-2-orchestration-patterns",
+    "domainNum": 1,
+    "traps": [
+      "Blaming downstream subagents for coverage gaps when the coordinator's task decomposition was too narrow",
+      "Assuming subagents share memory or inherit the coordinator's conversation history",
+      "Proposing direct inter-subagent communication as an efficiency improvement",
+      "Adding more subagents to fix a decomposition problem"
+    ],
+    "concept": "Multi-agent orchestration is how you get several Claude agents working together on one complex task. The exam isn't loose about the shape this takes. It tests one pattern: **hub-and-spoke** , with a coordinator at the centre."
+  },
+  {
+    "num": "1.3",
+    "title": "Subagent Invocation and Context Passing",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-3-subagent-invocation-context",
+    "domainNum": 1,
+    "traps": [
+      "Assuming subagents automatically have access to the coordinator's conversation history or other subagents' outputs",
+      "Blaming the synthesis agent for missing citations when the real issue is context passing without metadata",
+      "Proposing sequential subagent invocation for tasks that can run independently",
+      "Confusing fork_session with --resume"
+    ],
+    "concept": "Task Statement 1.3 is about the mechanics of how a coordinator actually invokes subagents and passes information between them. If 1.2 taught you the architecture, 1.3 teaches you the wiring."
+  },
+  {
+    "num": "1.4",
+    "title": "Workflow Enforcement and Handoff",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-4-workflow-enforcement-handoff",
+    "domainNum": 1,
+    "traps": [
+      "Enhanced system prompt instructions as the fix for high-stakes compliance failures",
+      "Few-shot examples as sufficient for guaranteed compliance",
+      "Routing classifiers proposed to fix per-agent compliance issues",
+      "Handoff summaries that omit critical fields like customer ID or recommended action"
+    ],
+    "concept": "Task Statement 1.4 draws a hard line between two approaches to controlling agent behaviour: prompt-based guidance and programmatic enforcement. The exam tests this distinction repeatedly, and getting it wrong on high-stakes scenarios will cost you marks."
+  },
+  {
+    "num": "1.5",
+    "title": "Agent SDK Hooks",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-5-agent-sdk-hooks",
+    "domainNum": 1,
+    "traps": [
+      "Using PostToolUse hooks to block policy-violating actions",
+      "Enhanced prompt instructions as the solution for 100% compliance requirements",
+      "Suggesting model-side data transformation instead of PostToolUse hooks for normalisation",
+      "Confusing the direction of hooks — PostToolUse runs after execution, PreToolUse runs before"
+    ],
+    "concept": "Agent SDK hooks inject deterministic behaviour into an otherwise probabilistic system. They sit right at the boundary between the model's decisions and the real world, intercepting tool calls and results to enforce business rules and normalise data. Remember the enforcement spectrum from 1.4? Hooks are how you implement its programmatic side in practice."
+  },
+  {
+    "num": "1.6",
+    "title": "Task Decomposition Strategies",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-6-task-decomposition",
+    "domainNum": 1,
+    "traps": [
+      "Suggesting a more powerful model or larger context window as the fix for attention dilution",
+      "Proposing a single-pass review with better prompts as equivalent to multi-pass architecture",
+      "Applying fixed pipelines to open-ended investigation tasks",
+      "Batching files into groups without adding a cross-file integration pass"
+    ],
+    "concept": "Task decomposition is how you break complex work into pieces an agentic system can actually handle. The exam tests two patterns and expects you to pick the right one for the task in front of you. Pick wrong and the work suffers in predictable ways. It also tests one specific failure mode — attention dilution — that shows up when decomposition is too shallow."
+  },
+  {
+    "num": "1.7",
+    "title": "Session State and Resumption",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-7-session-state-resumption",
+    "domainNum": 1,
+    "traps": [
+      "Suggesting full re-exploration of a 50-file codebase when only 3 files changed",
+      "Recommending --resume after files have been modified",
+      "Confusing fork_session with --resume",
+      "Using fork_session to handle stale context after file changes"
+    ],
+    "concept": "Session management determines how an agent maintains continuity across work sessions. In long-running tasks — debugging a complex system, reviewing a large codebase, conducting multi-day research — the agent's context accumulates tool results, file analyses, and reasoning chains. Task Statement 1.7 covers how to manage this accumulated state: when to continue it, when to branch it, and when to start fresh."
+  },
+  {
+    "num": "2.1",
+    "title": "Tool Interface Design",
+    "domainSlug": "2-tool-design-mcp",
+    "taskSlug": "2-1-tool-schema-design",
+    "domainNum": 2,
+    "traps": [
+      "Choosing few-shot examples to fix tool misrouting caused by minimal descriptions",
+      "Implementing a routing classifier as the first step to fix tool selection",
+      "Consolidating similar tools into one as the first step",
+      "Ignoring system prompt wording after updating tool descriptions"
+    ],
+    "concept": "Tool descriptions are the PRIMARY mechanism LLMs use for tool selection. Not supplementary metadata. Not an afterthought. The mechanism. When a model receives a set of tools, it reads the descriptions to decide which one to call — and if those descriptions are minimal, something like \"Retrieves customer information\", it has no way to tell apart tools that serve overlapping purposes."
+  },
+  {
+    "num": "2.2",
+    "title": "Structured Error Responses",
+    "domainSlug": "2-tool-design-mcp",
+    "taskSlug": "2-2-structured-error-responses",
+    "domainNum": 2,
+    "traps": [
+      "Retrying when a tool returns an empty result from a successful query",
+      "Using generic error messages like 'Operation failed' without structured metadata",
+      "Treating business errors as retryable",
+      "Marking a validation error isRetryable: true because the agent can recover from it",
+      "Reading isRetryable: false as 'abandon the task'",
+      "Silently suppressing subagent errors by returning empty results as success"
+    ],
+    "concept": "When an MCP tool fails, the error response it returns determines whether the agent can recover intelligently or fail blindly. Generic messages like \"Operation failed\" are useless to an LLM. No signal about what went wrong, whether to retry, or what to try instead. The MCP protocol provides the `isError` flag specifically for communicating tool failures back to the agent. Set it and the model knows the execution failed, so it can reason about recovery instead of treating the error text as a normal successful result."
+  },
+  {
+    "num": "2.3",
+    "title": "Tool Distribution & Tool Choice",
+    "domainSlug": "2-tool-design-mcp",
+    "taskSlug": "2-3-tool-distribution-choice",
+    "domainNum": 2,
+    "traps": [
+      "Routing all simple verification requests through the coordinator when 85% are simple lookups",
+      "Using tool_choice 'auto' when structured output is required",
+      "Giving an agent 18 tools and expecting reliable selection",
+      "Giving a subagent a generic fetch_url tool when a constrained load_document would suffice"
+    ],
+    "concept": "The number of tools you give an agent directly affects how reliably it selects the right one. That sounds like an implementation detail. It isn't — it's an architectural decision that determines whether your multi-agent system works in production."
+  },
+  {
+    "num": "2.4",
+    "title": "MCP Server Integration",
+    "domainSlug": "2-tool-design-mcp",
+    "taskSlug": "2-4-mcp-server-integration",
+    "domainNum": 2,
+    "traps": [
+      "Building a custom MCP server for a standard integration like Jira",
+      "Putting team-wide MCP server configuration in ~/.claude.json",
+      "Committing credentials directly in .mcp.json instead of using environment variable expansion",
+      "Leaving MCP tool descriptions sparse, causing the agent to prefer built-in tools"
+    ],
+    "concept": "MCP (Model Context Protocol) servers extend Claude's capabilities by connecting it to external systems — databases, APIs, development tools, issue trackers. Configuring them correctly determines whether your team shares a consistent toolset or descends into configuration chaos."
+  },
+  {
+    "num": "2.5",
+    "title": "Built-in Tools",
+    "domainSlug": "2-tool-design-mcp",
+    "taskSlug": "2-5-built-in-tools",
+    "domainNum": 2,
+    "traps": [
+      "Using Glob to find function callers (it searches paths, not contents)",
+      "Using Grep to find files by extension or naming pattern",
+      "Reading all source files upfront before understanding what is relevant",
+      "Defaulting to Read + Write for every file modification instead of trying Edit first",
+      "Answering 'widen old_string or set replace_all' when a question asks what to do after Edit reports a non-unique match"
+    ],
+    "concept": "Claude Code provides six built-in tools for working with codebases: Read, Write, Edit, Bash, Grep, and Glob. Each has a specific purpose, and using the wrong tool for a task wastes time, context tokens, or both. The exam deliberately presents scenarios where confusing these tools leads to incorrect answers."
+  },
+  {
+    "num": "3.1",
+    "title": "CLAUDE.md Hierarchy, Scoping, and Modular Organisation",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-1-claude-md-hierarchy",
+    "domainNum": 3,
+    "traps": [
+      "New team member not receiving Claude Code instructions despite working on the same repo and branch",
+      "Thinking /memory triggers configuration loading",
+      "Assuming directory-level CLAUDE.md is the best solution for cross-directory conventions"
+    ],
+    "concept": "Claude Code reads configuration from CLAUDE.md files at three levels. Knowing which one applies where — and spotting when the wrong level was used — comes up again and again on the exam."
+  },
+  {
+    "num": "3.2",
+    "title": "Custom Slash Commands and Skills",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-2-slash-commands-skills",
+    "domainNum": 3,
+    "traps": [
+      "Creating a flat Markdown file directly inside .claude/skills/ (e.g., .claude/skills/review.md) and expecting a /review command",
+      "Placing a team-shared command in a user-scoped path (~/.claude/commands/ or ~/.claude/skills/) instead of a project-scoped path",
+      "Thinking skills behave like CLAUDE.md for always-on guidance",
+      "Not knowing when to use context: fork",
+      "Putting task-specific workflows in CLAUDE.md"
+    ],
+    "concept": "Custom commands and skills have been merged into a single unified system: the **Skills system**. The two locations, `.claude/skills/` and `.claude/commands/`, create `/commands` that behave the same way, but their file structures differ. A skill is a **directory containing a`SKILL.md` file** (`.claude/skills/deploy/SKILL.md`); a command is a **flat Markdown file** (`.claude/commands/deploy.md`). A flat file placed directly inside `.claude/skills/` does not create a command. The `.claude/skills/` path is the canonical location. `.claude/commands/` still works for backward compatibility."
+  },
+  {
+    "num": "3.3",
+    "title": "Path-Specific Rules for Conditional Convention Loading",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-3-path-specific-rules",
+    "domainNum": 3,
+    "traps": [
+      "Choosing directory-level CLAUDE.md over path-specific rules for cross-directory conventions",
+      "Placing file-type-specific conventions in root CLAUDE.md",
+      "Confusing skills with path-specific rules for automatic convention application"
+    ],
+    "concept": "Path-specific rules apply conventions conditionally, based on which files you're editing. They solve something neither root CLAUDE.md nor directory-level CLAUDE.md handles well: conventions that must apply to one file type scattered across many directories."
+  },
+  {
+    "num": "3.4",
+    "title": "Plan Mode vs Direct Execution",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-4-plan-mode-execution",
+    "domainNum": 3,
+    "traps": [
+      "Defaulting to direct execution for multi-file architectural changes",
+      "Using plan mode for a single-file bug fix with a clear stack trace",
+      "Not recognising the plan-then-execute hybrid pattern",
+      "Starting direct execution and switching to plan mode only when complexity emerges"
+    ],
+    "concept": "Claude Code works in two main modes: plan mode and direct execution. The exam tests whether you can pick the right one for a given task. It's not a matter of taste — there are clear criteria for when each mode fits."
+  },
+  {
+    "num": "3.5",
+    "title": "Iterative Refinement Techniques",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-5-iterative-refinement",
+    "domainNum": 3,
+    "traps": [
+      "Choosing to refine prose descriptions when the model interprets them inconsistently",
+      "Not recognising when to batch vs sequence feedback",
+      "Confusing the interview pattern with the examples technique"
+    ],
+    "concept": "Working with Claude Code is iterative. The first output is rarely the final one. The exam checks that you know the specific techniques for steering Claude Code toward the right result — and which one to reach for first in each situation."
+  },
+  {
+    "num": "3.6",
+    "title": "CI/CD Integration",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-6-cicd-integration",
+    "domainNum": 3,
+    "traps": [
+      "CI pipeline hanging because Claude Code is waiting for interactive input",
+      "Assuming self-review in the same session is as effective as independent review",
+      "Using the Batch API for pre-merge CI checks",
+      "Not including prior review findings in subsequent review runs"
+    ],
+    "concept": "Drop Claude Code into a CI/CD pipeline and it stops being an interactive developer tool and becomes an automated review and generation engine. The exam tests five concepts in this task statement, and the `-p` flag is the single most directly tested item (it's Question 10 in the sample question set)."
+  },
+  {
+    "num": "4.1",
+    "title": "System Prompts with Explicit Criteria",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-1-system-prompts",
+    "domainNum": 4,
+    "traps": [
+      "Choosing 'be conservative' or 'only report high-confidence findings' as valid prompt improvements",
+      "Assuming confidence thresholds fix false positive problems",
+      "Keeping all review categories active while iterating on high false-positive categories"
+    ],
+    "concept": "The single biggest mistake in production prompt engineering is relying on vague instructions. \"Be conservative.\" \"Only report high-confidence findings.\" \"Use your best judgement.\" None of these give the model an actionable decision boundary. They sound reasonable, which is exactly why the exam uses them as distractors. The correct approach is **explicit categorical criteria** that define precisely what the model should flag and what it should skip. Compare these two system prompts for a CI/CD code review pipeline: **Wrong approach:** Copy"
+  },
+  {
+    "num": "4.2",
+    "title": "Few-Shot Prompting",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-2-few-shot-prompting",
+    "domainNum": 4,
+    "traps": [
+      "Choosing 'add more detailed instructions' when output formatting is inconsistent",
+      "Thinking few-shot examples only teach literal pattern-matching",
+      "Using confidence thresholds to fix inconsistent judgement calls"
+    ],
+    "concept": "Few-shot examples are the most effective technique for achieving consistent, well-formatted output from Claude. Not more instructions. Not confidence thresholds. Not temperature adjustments. When your output is inconsistent, few-shot examples are the first tool to reach for. This is a direct exam principle. The exam presents scenarios where detailed instructions produce inconsistent results and tests whether you choose \"add more instructions\" or \"add few-shot examples.\" The correct answer is almost always the latter."
+  },
+  {
+    "num": "4.3",
+    "title": "Structured Output with Tool Use",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-3-structured-output",
+    "domainNum": 4,
+    "traps": [
+      "Believing tool_use with JSON schemas prevents all extraction errors",
+      "Confusing tool_choice 'auto' with 'any'",
+      "Making all schema fields required to ensure data completeness"
+    ],
+    "concept": "When you need guaranteed schema-compliant structured output from Claude, there is a clear reliability hierarchy:"
+  },
+  {
+    "num": "4.4",
+    "title": "Validation, Retry, and Feedback Loops",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-4-validation-retry-loops",
+    "domainNum": 4,
+    "traps": [
+      "Assuming retries always work for extraction failures",
+      "Implementing retries without including the specific validation error",
+      "Relying on schema validation alone without semantic checks",
+      "Treating Pydantic as redundant once tool_use enforces a JSON schema"
+    ],
+    "concept": "Production extraction systems fail. Documents arrive in unexpected formats, numerical values don't add up, and fields end up in the wrong places. The question isn't whether failures happen but how your system responds. The validation-retry pattern turns those failures into self-correcting workflows."
+  },
+  {
+    "num": "4.5",
+    "title": "Batch Processing Strategies",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-5-batch-processing",
+    "domainNum": 4,
+    "traps": [
+      "Switching all workflows to batch processing for cost savings",
+      "Assuming batch results arrive quickly because they often do",
+      "Using batch API for workflows requiring multi-turn tool calling"
+    ],
+    "concept": "The Message Batches API is a cost optimisation tool with hard constraints that the exam tests directly. Understanding when to use it — and when not to — is the core of this task statement."
+  },
+  {
+    "num": "4.6",
+    "title": "Multi-Instance and Multi-Pass Review",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-6-multi-pass-review",
+    "domainNum": 4,
+    "traps": [
+      "Choosing self-review in the same session as a viable review strategy",
+      "Using a single pass for large multi-file reviews",
+      "Switching to a larger context window model to fix attention dilution",
+      "Using uncalibrated confidence scores for automated review routing"
+    ],
+    "concept": "When Claude reviews its own output, it starts at a disadvantage: it still carries the reasoning it used to generate that output. The model remembers why it made each decision and is less likely to question it. That's not a bug. It's just how self-review works inside a single session. The job is to design around it."
+  },
+  {
+    "num": "5.1",
+    "title": "Context Window Management",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-1-context-window-management",
+    "domainNum": 5,
+    "traps": [
+      "Thinking progressive summarisation is safe for transactional data",
+      "Assuming the 'lost in the middle' effect is solved by telling the model to pay attention to everything",
+      "Keeping full tool results in context because 'the model might need them later'",
+      "Believing conversation history can be selectively truncated without consequences"
+    ],
+    "concept": "Context window management is the foundation of reliable Claude-based systems. Every multi-turn conversation, every multi-agent pipeline, every long-document extraction task depends on what you let into the context window. Get it wrong and the failures are concrete: your support agent forgets refund amounts, your research pipeline drops citations, your extraction system loses precision on the fields that matter most."
+  },
+  {
+    "num": "5.2",
+    "title": "Escalation & Ambiguity Resolution",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-2-escalation-ambiguity",
+    "domainNum": 5,
+    "traps": [
+      "Sentiment-based escalation seems reasonable but is fundamentally unreliable",
+      "Self-reported confidence scores provide a reliable escalation signal",
+      "Attempting to resolve before honouring an explicit human request",
+      "Selecting from ambiguous customer matches using the most recent or most active record"
+    ],
+    "concept": "Escalation calibration is a make-or-break capability for customer support agents. Miscalibrated escalation directly destroys first-contact resolution rates. The exam tests your understanding of when to escalate, when to resolve autonomously, and which commonly proposed escalation triggers are unreliable."
+  },
+  {
+    "num": "5.3",
+    "title": "Error Propagation in Multi-Agent Systems",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-3-error-propagation",
+    "domainNum": 5,
+    "traps": [
+      "Catching a timeout and returning empty results marked as successful",
+      "Terminating the entire research pipeline when one subagent times out",
+      "Returning a generic 'search unavailable' status after retry exhaustion",
+      "Retrying a valid empty result because it looks like a failure"
+    ],
+    "concept": "Error propagation determines whether a multi-agent system recovers gracefully or fails silently. When a subagent encounters a failure — a timeout, a permission error, an invalid query — how that failure information flows back to the coordinator dictates the system's reliability. The exam tests your understanding of structured error context, the two critical anti-patterns, and the distinction that most developers get wrong: access failures versus valid empty results."
+  },
+  {
+    "num": "5.4",
+    "title": "Codebase Exploration & Context Degradation",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-4-codebase-exploration",
+    "domainNum": 5,
+    "traps": [
+      "Increasing the context window to solve context degradation",
+      "Assuming subagent delegation is only about parallelisation",
+      "Restarting a session to fix context degradation without saving state",
+      "Using /compact only when hitting context limits"
+    ],
+    "concept": "Large codebase exploration is one of the most context-intensive tasks a Claude-based agent performs. Whether an agent is exploring an unfamiliar repository, tracing dependency chains, or understanding legacy systems, extended sessions create a specific failure mode: context degradation. It has nothing to do with running out of tokens. The model simply loses its grip on earlier findings as the context fills with verbose discovery output."
+  },
+  {
+    "num": "5.5",
+    "title": "Human Review & Confidence Calibration",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-5-human-review-calibration",
+    "domainNum": 5,
+    "traps": [
+      "Using aggregate accuracy (e.g., 97%) to justify automating all high-confidence extractions",
+      "Only sampling low-confidence extractions for human review",
+      "Using raw model confidence scores without calibration",
+      "Spreading reviewer capacity evenly across all extractions"
+    ],
+    "concept": "Human review is the safety net for automated extraction and classification systems. The exam tests your understanding of when and how to deploy human reviewers effectively. The core challenge is not whether to use human review, but how to allocate limited reviewer capacity to maximise accuracy while minimising cost. This requires understanding confidence calibration, the trap of aggregate metrics, and stratified sampling strategies."
+  },
+  {
+    "num": "5.6",
+    "title": "Information Provenance & Multi-Source Synthesis",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-6-information-provenance",
+    "domainNum": 5,
+    "traps": [
+      "Selecting the most recent source when two credible sources conflict",
+      "Assuming different numbers from different sources are contradictions",
+      "Allowing the synthesis agent to paraphrase without preserving claim-source mappings",
+      "Rendering all content types in a uniform format (all prose, all tables, or all lists)"
+    ],
+    "concept": "Information provenance — knowing where every claim comes from and how confident you should be in it — is the difference between a research system that produces trustworthy outputs and one that produces plausible-sounding fiction. The exam tests your understanding of how attribution survives (or dies) through multi-agent synthesis pipelines, how to handle conflicting sources, and how temporal context prevents false contradictions."
+  }
+]

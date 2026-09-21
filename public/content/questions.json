@@ -1,0 +1,1022 @@
+[
+  {
+    "id": "1.1",
+    "domainNum": 1,
+    "domainTitle": "Agentic Architecture & Orchestration",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-1-agentic-loops",
+    "taskTitle": "Agentic Loops",
+    "question": "A developer's agent sometimes terminates prematurely when Claude returns text alongside a tool call. Their loop checks response.content[0].type == 'text' to determine if the agent is finished. Users report incomplete responses on complex queries. What should the developer change?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Add an iteration cap of 15 loops to ensure the agent runs long enough for complex queries"
+      },
+      {
+        "letter": "B",
+        "text": "Check the stop_reason field instead of content type — continue when stop_reason is tool_use, terminate when end_turn"
+      },
+      {
+        "letter": "C",
+        "text": "Set tool_choice to any so Claude always calls a tool instead of returning text"
+      },
+      {
+        "letter": "D",
+        "text": "Parse the assistant text for completion phrases like I have finished before terminating the loop"
+      }
+    ],
+    "correct": "B",
+    "explain": {
+      "A": "Iteration cap itu safety net doang, bukan alat utama buat ngontrol loop. Kalau task butuh 16 iterasi, agent-nya mati prematur lagi — masalahnya nggak beres.",
+      "B": "Benar. stop_reason itu satu-satunya sinyal deterministik buat loop control. tool_use = lanjut, end_turn = selesai. Nggak peduli ada teks atau nggak di response-nya.",
+      "C": "Tool_choice: any maksa Claude selalu manggil tool — pas agent-nya udah beneran beres, dia tetep dipaksa nge-call tool = infinite loop.",
+      "D": "Parsing kalimat 'gue udah beres' itu ambigu. Claude bisa bilang 'selesai analisis file pertama' padahal masih lanjut file kedua. Natural language bukan sinyal kontrol."
+    }
+  },
+  {
+    "id": "1.2",
+    "domainNum": 1,
+    "domainTitle": "Agentic Architecture & Orchestration",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-2-orchestration-patterns",
+    "taskTitle": "Multi-Agent Orchestration",
+    "question": "A multi-agent research system produces a report on 'renewable energy technologies' that only covers solar and wind power. Each subagent produced thorough, well-sourced coverage of its assigned topic. The web search subagent returned relevant results for every query it received. The synthesis subagent accurately combined all research it was given. What is the most likely root cause of the coverage gap?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "The document analysis subagent had no access to sources covering the other renewable energy categories, so none of those sections were ever written"
+      },
+      {
+        "letter": "B",
+        "text": "The synthesis subagent failed to identify gaps in the research it received and request additional coverage of the missing technology categories from the coordinator"
+      },
+      {
+        "letter": "C",
+        "text": "The web search subagent used queries that were too narrow, so geothermal, tidal, biomass and fusion sources never appeared anywhere in its results"
+      },
+      {
+        "letter": "D",
+        "text": "The coordinator decomposed the topic into only solar and wind subtopics, never assigning geothermal, tidal, biomass, or fusion to any subagent"
+      }
+    ],
+    "correct": "D",
+    "explain": {
+      "A": "Nggak relevan — semua subagent cuma ngerjain apa yang di-assign. Kalau coordinernya nggak assign geothermal, ya nggak ada yang nulis soal geothermal.",
+      "B": "Synthesis subagent kerjanya bener: dia gabungin semua yang diterima. Masalahnya bukan di gabungan, tapi di assignment yang cuma solar + wind dari awal.",
+      "C": "Query search cuma jalan untuk topik yang di-assign coordinator. Kalau subtopiknya cuma solar & wind, query sebagus apa pun nggak bakal nyari geothermal.",
+      "D": "Benar. Trace failure ke asalnya: coverage gap terjadi karena coordinator decomposition terlalu sempit — geothermal, tidal, biomass, fusion nggak pernah di-assign ke subagent mana pun."
+    }
+  },
+  {
+    "id": "1.3",
+    "domainNum": 1,
+    "domainTitle": "Agentic Architecture & Orchestration",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-3-subagent-invocation-context",
+    "taskTitle": "Subagent Invocation and Context Passing",
+    "question": "A synthesis agent produces a report where several claims have no source attribution. The web search subagent correctly returns results with URLs, titles, and snippets. The document analysis subagent correctly returns analysis with page references. Both subagents are verified to be working properly. What is the most likely root cause?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "The synthesis agent should be given direct access to the web search tool so it can re-run the queries and verify sources itself"
+      },
+      {
+        "letter": "B",
+        "text": "The coordinator passes content to the synthesis agent without structured metadata — source URLs, document names, and page numbers are not included"
+      },
+      {
+        "letter": "C",
+        "text": "The synthesis agent system prompt lacks explicit instructions to cite sources, so it summarises the research without carrying any attribution into the report"
+      },
+      {
+        "letter": "D",
+        "text": "The web search subagent returns its results in a format the synthesis agent cannot parse, so the source URLs and document titles are dropped during synthesis"
+      }
+    ],
+    "correct": "B",
+    "explain": {
+      "A": "Kasih akses tool langsung ke synthesis agent itu solusi mahal & salah diagnosis — dia nggak bisa nyitir sumber yang nggak pernah dia terima. Perbaiki context passing-nya.",
+      "B": "Benar. Synthesis agent cuma bisa nyitir metadata yang dikasih coordinator. Kalau URL, nama dokumen, dan nomor halaman dibuang sebelum diterusin, ya report-nya pasti tanpa atribusi.",
+      "C": "Instruksi 'sitasi sumbernya' nggak guna kalau metadata sumbernya sendiri nggak pernah dikirim. Model nggak bisa mengarang URL yang valid.",
+      "D": "Dua subagent terbukti kerja dengan benar dan return format yang terstruktur. Masalahnya di coordinator yang strip metadata, bukan di format."
+    }
+  },
+  {
+    "id": "1.4",
+    "domainNum": 1,
+    "domainTitle": "Agentic Architecture & Orchestration",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-4-workflow-enforcement-handoff",
+    "taskTitle": "Workflow Enforcement and Handoff",
+    "question": "Production data reveals that in 8% of cases, a customer support agent processes refunds without verifying account ownership, occasionally leading to refunds on wrong accounts. The system prompt clearly states 'always verify customer identity before processing refunds.' What is the most appropriate fix?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Add few-shot examples demonstrating the correct verification-then-refund workflow sequence"
+      },
+      {
+        "letter": "B",
+        "text": "Implement a programmatic prerequisite gate that blocks process_refund until get_customer has returned a verified customer ID"
+      },
+      {
+        "letter": "C",
+        "text": "Add stronger instructions to the system prompt emphasising the critical importance of verification before any refund processing"
+      },
+      {
+        "letter": "D",
+        "text": "Implement a routing classifier that sends all refund requests to a specialised verification-first pipeline"
+      }
+    ],
+    "correct": "B",
+    "explain": {
+      "A": "Few-shot itu masih prompt-based = probabilistik. 8% kegagalan bisa turun dikit, tapi tetap ada. Buat duit, 1 kegagalan aja udah rugi.",
+      "B": "Benar. Prerequisite gate programatik itu deterministik: process_refund fisiknya nggak bisa jalan sebelum get_customer return verified customer ID. Model nggak bisa bypass kode.",
+      "C": "Perkuat prompt = tetap probabilistik. Data produksi udah ngebuktiin prompt aja gagal 8%. Kasus uang/keamanan/compliance wajib programmatic enforcement.",
+      "D": "Routing classifier nambah infrastruktur tapi tetap nggak jamin urutan verifikasi → refund. Ini over-engineered, yang dibutuhkan adalah gate sederhana di kode."
+    }
+  },
+  {
+    "id": "1.5",
+    "domainNum": 1,
+    "domainTitle": "Agentic Architecture & Orchestration",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-5-agent-sdk-hooks",
+    "taskTitle": "Agent SDK Hooks",
+    "question": "An agent occasionally processes international transfers without required compliance checks. The compliance team requires 100% enforcement of anti-money laundering (AML) checks before any international transfer is executed. The current system uses prompt instructions that work approximately 95% of the time. What is the correct approach?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Implement a PreToolUse hook that blocks the transfer_funds tool from executing until aml_check returns a verified pass result"
+      },
+      {
+        "letter": "B",
+        "text": "Add detailed AML check instructions to the system prompt with examples of correct behaviour and explicit warnings about penalties for non-compliance"
+      },
+      {
+        "letter": "C",
+        "text": "Add a PostToolUse hook that flags any completed transfer which skipped its AML check and queues it for manual review by the compliance team"
+      },
+      {
+        "letter": "D",
+        "text": "Train the agent with few-shot examples demonstrating the correct AML verification workflow before every transfer"
+      }
+    ],
+    "correct": "A",
+    "explain": {
+      "A": "Benar. PreToolUse hook bisa nge-deny transfer_funds sampai aml_check return verified pass. Ini enforcement 100% — persis yang diminta compliance team.",
+      "B": "Prompt + contoh + warning = tetap probabilistik (95%). Compliance butuh 100%, jadi jawaban prompt-based otomatis salah.",
+      "C": "PostToolUse hook itu ex-post: transfer udah jalan dulu baru di-flag. Buat AML itu udah kejadian pelanggaran — salah urutan.",
+      "D": "Few-shot lagi-lagi probabilistik. Uang + regulasi = programmatic enforcement, titik."
+    }
+  },
+  {
+    "id": "1.6",
+    "domainNum": 1,
+    "domainTitle": "Agentic Architecture & Orchestration",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-6-task-decomposition",
+    "taskTitle": "Task Decomposition Strategies",
+    "question": "A code review agent processes 14 files and produces detailed feedback for the first 5 files but misses obvious bugs in files 10-14. It also flags a forEach loop as inefficient in one file while approving identical code in another. What is the root cause and the most appropriate solution?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Reduce the number of files per review to 5 and process in sequential batches of 5 files each"
+      },
+      {
+        "letter": "B",
+        "text": "The model context window is too small to hold all 14 files — upgrade to a model with a larger context window"
+      },
+      {
+        "letter": "C",
+        "text": "Add a stronger system prompt emphasising the importance of reviewing all files with equal thoroughness"
+      },
+      {
+        "letter": "D",
+        "text": "Split the review into per-file local analysis passes plus a separate cross-file integration pass to avoid attention dilution"
+      }
+    ],
+    "correct": "D",
+    "explain": {
+      "A": "Sequential batching nambah latency dan nggak nyembuhin inkonsistensi antar file (kode identik disetujui di satu file, di-flag di file lain).",
+      "B": "Masalahnya bukan size context window, tapi attention dilution: semua file masuk satu pass, perhatiannya menipis di file 10-14.",
+      "C": "Prompt 'review semua file dengan teliti' itu tetap probabilistik — persis pola yang udah gagal di soal ini.",
+      "D": "Benar. Pisah jadi per-file local pass (depth konsisten) + cross-file integration pass (data flow & inkonsistensi antar file). Ini resep resmi guide buat attention dilution."
+    }
+  },
+  {
+    "id": "1.7",
+    "domainNum": 1,
+    "domainTitle": "Agentic Architecture & Orchestration",
+    "domainSlug": "1-agentic-architecture",
+    "taskSlug": "1-7-session-state-resumption",
+    "taskTitle": "Session State and Resumption",
+    "question": "A developer resumes a Claude Code session after modifying 3 files in a 50-file codebase. The agent gives contradictory advice about the modified files — recommending changes that were already made and referencing code that no longer exists. What is the most appropriate approach?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Resume the existing session and ask the agent to re-read the 3 modified files, keeping the rest of the conversation history available for continuity"
+      },
+      {
+        "letter": "B",
+        "text": "Start a completely new session with no carried-over context and re-analyse the entire 50-file codebase from scratch before continuing the work"
+      },
+      {
+        "letter": "C",
+        "text": "Start a fresh session with an injected summary of prior findings and inform the agent about the specific 3 file changes for targeted re-analysis"
+      },
+      {
+        "letter": "D",
+        "text": "Use fork_session to branch the existing session so the file changes can be incorporated in a separate line of work"
+      }
+    ],
+    "correct": "C",
+    "explain": {
+      "A": "Resume + re-read 3 file doang nggak cukup: history lama masih penuh asumsi yang udah kedaluwarsa (kode yang udah nggak ada).",
+      "B": "Full re-analyze 50 file dari nol itu boros banget — finding lama yang masih valid ikut kebuang.",
+      "C": "Benar. Session baru + summary prior findings yang masih relevan + info 3 file yang berubah buat re-analisis ter-target. Efisien dan akurat.",
+      "D": "fork_session cuma nge-branch history yang sama — history stalenya ikut kebawa, jadi sumber masalah tetap ada."
+    }
+  },
+  {
+    "id": "2.1",
+    "domainNum": 2,
+    "domainTitle": "Tool Design & MCP Integration",
+    "domainSlug": "2-tool-design-mcp",
+    "taskSlug": "2-1-tool-schema-design",
+    "taskTitle": "Tool Interface Design",
+    "question": "Production logs show an agent frequently calls get_customer when users ask about orders (e.g. 'check my order #12345'), instead of calling lookup_order. Both tools have minimal descriptions ('Retrieves customer information' / 'Retrieves order details') and accept similar identifier formats. What is the most effective first step to improve tool selection reliability?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Add 5-8 few-shot examples to the system prompt demonstrating correct tool selection patterns for order-related queries."
+      },
+      {
+        "letter": "B",
+        "text": "Expand each tool description to include input formats, example queries, edge cases, and boundaries explaining when to use it versus similar tools."
+      },
+      {
+        "letter": "C",
+        "text": "Consolidate both tools into a single lookup_entity tool that accepts any identifier and internally determines which backend to query."
+      },
+      {
+        "letter": "D",
+        "text": "Implement a routing layer that parses user input before each turn and pre-selects the appropriate tool based on detected keywords."
+      }
+    ],
+    "correct": "B",
+    "explain": {
+      "A": "Few-shot nambah token tanpa ngeroot-cause. Model bingung karena deskripsinya nggak bisa bedain dua tool, bukan karena kurang contoh.",
+      "B": "Benar. Deskripsi tool adalah mekanisme utama pemilihan tool. Expand dengan format input, contoh query, edge cases, dan boundary ('jangan pakai untuk X — pakai Y') = fix paling murah paling ampuh.",
+      "C": "Consolidation valid sebagai keputusan arsitektur jangka panjang, tapi overkill sebagai first step. Effort-nya jauh lebih besar dari nulis ulang deskripsi.",
+      "D": "Routing classifier nge-bypass pemahaman natural language si LLM + nambah infrastruktur. Over-engineered buat masalah deskripsi."
+    }
+  },
+  {
+    "id": "2.2",
+    "domainNum": 2,
+    "domainTitle": "Tool Design & MCP Integration",
+    "domainSlug": "2-tool-design-mcp",
+    "taskSlug": "2-2-structured-error-responses",
+    "taskTitle": "Structured Error Responses",
+    "question": "A tool returns an empty array after a customer lookup. The agent retries 3 times, then escalates to a human agent. Analysis shows the customer's account simply does not exist. What is the root cause of this wasted effort?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "The retry limit is too low. Raising it to 5 attempts would give the lookup enough chances to return the account before escalation triggers."
+      },
+      {
+        "letter": "B",
+        "text": "The system prompt should instruct the agent never to retry a customer lookup, so that every failed search escalates to a human immediately."
+      },
+      {
+        "letter": "C",
+        "text": "The escalation threshold is too aggressive. The agent should exhaust more retries before involving a human in the loop."
+      },
+      {
+        "letter": "D",
+        "text": "The tool does not distinguish between access failures and valid empty results, so the agent treats no matches as a retriable failure."
+      }
+    ],
+    "correct": "D",
+    "explain": {
+      "A": "Naikin retry limit malah nambah waste — account-nya memang nggak ada, retry 100 kali pun tetep kosong.",
+      "B": "Larang retry semua lookup = access failure beneran (DB down) langsung di-eskalasi tanpa di-retry. Salah dua arah.",
+      "C": "Threshold bukan masalahnya. Yang salah: agent nggak bisa bedain 'query sukses, hasilnya memang kosong' vs 'query gagal'.",
+      "D": "Benar. Valid empty result ≠ access failure. Structured response-nya harus membedakan: resultCount: 0 + isError: false (jangan retry) vs isError: true + isRetryable: true (DB nggak ke-reach)."
+    }
+  },
+  {
+    "id": "2.3",
+    "domainNum": 2,
+    "domainTitle": "Tool Design & MCP Integration",
+    "domainSlug": "2-tool-design-mcp",
+    "taskSlug": "2-3-tool-distribution-choice",
+    "taskTitle": "Tool Distribution & Tool Choice",
+    "question": "A synthesis agent frequently returns control to the coordinator for simple fact verification, adding 2-3 round trips per task and 40% latency. Analysis shows 85% of verifications are simple lookups. What is the most effective solution?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Give the synthesis agent a scoped verify_fact tool for simple lookups, routing only complex verifications through the coordinator."
+      },
+      {
+        "letter": "B",
+        "text": "Remove the fact verification step from the synthesis workflow entirely so no task ever pays the round-trip latency."
+      },
+      {
+        "letter": "C",
+        "text": "Cache all verification results at the coordinator level so that repeated lookups return instantly without a second round trip to any subagent."
+      },
+      {
+        "letter": "D",
+        "text": "Increase the coordinator parallelism so that verification requests are processed concurrently and the queueing delay disappears entirely."
+      }
+    ],
+    "correct": "A",
+    "explain": {
+      "A": "Benar. Scoped tool kecil buat lookup sederhana (85% kasus) ngebunuh round trip yang nggak perlu; verifikasi kompleks tetep ke coordinator. Latency turun drastis tanpa ngerusak arsitektur.",
+      "B": "Ngeskip verifikasi = kualitas riset anjlok. Jangan buang langkah penting demi latensi.",
+      "C": "Cache ngebantu lookup berulang doang, nggak ngatasin round trip buat lookup pertama-tama tiap fact. Ini partial fix yang nggak nyentuh akar masalah.",
+      "D": "Paralelisme coordinator nge-speed-up queue, tapi 2-3 round trip per task tetep kejadian. Bukan solusi yang tepat sasaran."
+    }
+  },
+  {
+    "id": "2.4",
+    "domainNum": 2,
+    "domainTitle": "Tool Design & MCP Integration",
+    "domainSlug": "2-tool-design-mcp",
+    "taskSlug": "2-4-mcp-server-integration",
+    "taskTitle": "MCP Server Integration",
+    "question": "A team needs to integrate with Jira for issue tracking in their Claude Code workflow. A developer proposes building a custom MCP server. What is the correct first step?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Evaluate existing community MCP servers for Jira and only build custom if they cannot handle team-specific workflows."
+      },
+      {
+        "letter": "B",
+        "text": "Add the Jira integration to ~/.claude.json so that each developer can configure their own connection to Jira independently."
+      },
+      {
+        "letter": "C",
+        "text": "Use the Jira REST API directly from Bash commands instead of MCP, which avoids the whole server setup and its configuration."
+      },
+      {
+        "letter": "D",
+        "text": "Build a custom MCP server exposing exactly the Jira API endpoints the team needs, so the integration matches their workflow precisely."
+      }
+    ],
+    "correct": "A",
+    "explain": {
+      "A": "Benar. Community servers dulu — cuma build custom kalau kebutuhan spesifik tim nggak ke-cover. Prinsip guide: low-effort, high-leverage dulu.",
+      "B": "~/.claude.json itu konfigurasi lokal per-developer, bukan solusi integrasi. Nggak nyambung sama pertanyaan build vs reuse.",
+      "C": "Raw REST via Bash = redo semuanya manual: auth, error handling, schema. Justru effort paling gede, justru nol integrasi tool yang proper.",
+      "D": "Build custom sebagai first step = over-engineering. Evaluasi yang udah ada dulu baru build custom kalau memang perlu."
+    }
+  },
+  {
+    "id": "2.5",
+    "domainNum": 2,
+    "domainTitle": "Tool Design & MCP Integration",
+    "domainSlug": "2-tool-design-mcp",
+    "taskSlug": "2-5-built-in-tools",
+    "taskTitle": "Built-in Tools",
+    "question": "A developer needs to find all files that call a deprecated function processLegacyOrder() and also find all test files for those callers. Which tool sequence is correct?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Bash with find and xargs grep for both steps, since a single shell pipeline can locate the callers and their test files in one pass without switching between built-in tools."
+      },
+      {
+        "letter": "B",
+        "text": "Glob for **/*processLegacyOrder* to find caller files, then Grep inside that result set for test files. Glob resolves the file list first, so the content search runs over fewer files and stays inside the context budget."
+      },
+      {
+        "letter": "C",
+        "text": "Grep for processLegacyOrder to find callers (this also surfaces tests that import the function directly), then Glob for the sibling test file of each caller (e.g. **/OrderProcessor.test.*) to catch tests that exercise the function through the source module without naming it."
+      },
+      {
+        "letter": "D",
+        "text": "Read all the source files to search for the function manually, then Read all the test files to pair them with their callers. Reading every file gives complete visibility of each call site and test, so no caller can be missed by a naming mismatch, and the full contents remain available in context for the later refactoring steps."
+      }
+    ],
+    "correct": "C",
+    "explain": {
+      "A": "Shell pipeline bisa aja, tapi guide tes apakah lu tahu tool bawaan: Grep buat nyari isi file, Glob buat pola nama file. Jawaban 'sebuah pipeline' nggak nunjukin pemahaman tool.",
+      "B": "Glob nyari berdasarkan NAMA file. processLegacyOrder itu nama fungsi di dalam kode, bukan nama file — Glob bakal balikin hasil kosong.",
+      "C": "Benar. Grep processLegacyOrder buat nemuin caller (sekalian nangkep test yang import langsung), lalu Glob sibling test file (**/OrderProcessor.test.*) buat test yang manggil via modul tanpa nyebut nama fungsi. Dua tool bawaan, dua peran yang tepat.",
+      "D": "Baca SEMUA file manual = bantai context budget & lambat. Justru antipattern yang guide larang."
+    }
+  },
+  {
+    "id": "3.1",
+    "domainNum": 3,
+    "domainTitle": "Claude Code Configuration & Workflows",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-1-claude-md-hierarchy",
+    "taskTitle": "CLAUDE.md Hierarchy, Scoping, and Modular Organisation",
+    "question": "Developer A's Claude Code follows the team's API naming conventions perfectly. Developer B, who joined last week, gets inconsistent naming from Claude Code. Both work on the same repo and branch. What is the most likely root cause?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Developer B has not yet installed the MCP server that supplies the naming convention rules for the team to the Claude Code session running on their machine"
+      },
+      {
+        "letter": "B",
+        "text": "The conventions are stored in a .claude/rules/ file that Developer B's local setup does not support, so the rules never load on their machine"
+      },
+      {
+        "letter": "C",
+        "text": "The API naming conventions are stored in Developer A's user-level CLAUDE.md (~/.claude/CLAUDE.md) rather than the project-level configuration"
+      },
+      {
+        "letter": "D",
+        "text": "Developer B has not run /memory to load the configuration files into the session, so the project-level instructions have never entered the model context"
+      }
+    ],
+    "correct": "C",
+    "explain": {
+      "A": "MCP server itu buat tools, bukan konvensi naming. Nggak nyambung sama skenario.",
+      "B": ".claude/rules/ itu fitur project-level yang ke-share lewat repo — kalau konvensinya di sana, Dev B juga bakal dapet.",
+      "C": "Benar. Kalau dua developer di repo & branch yang sama tapi perilaku beda, tersangka utamanya: konvensi disimpen di user-level ~/.claude/CLAUDE.md milik Dev A — cuma mesin Dev A yang ke-load.",
+      "D": "/memory cuma nampilin config yang ke-load, bukan prasyarat loading. Project CLAUDE.md ke-load otomatis."
+    }
+  },
+  {
+    "id": "3.2",
+    "domainNum": 3,
+    "domainTitle": "Claude Code Configuration & Workflows",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-2-slash-commands-skills",
+    "taskTitle": "Custom Slash Commands and Skills",
+    "question": "A team wants a /review command available to everyone who clones the repository. A developer also wants a personal /brainstorm skill that produces verbose codebase analysis output without cluttering the main conversation. Where should each be created and what configuration does the skill need?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Both in ~/.claude/commands/ with a note in the README instructing every developer to copy the two files into their own local setup"
+      },
+      {
+        "letter": "B",
+        "text": "Create both in .claude/commands/ so they ship with the repository, giving the brainstorm skill context: fork frontmatter for isolation"
+      },
+      {
+        "letter": "C",
+        "text": "/review in .claude/commands/ for team sharing; /brainstorm as ~/.claude/skills/brainstorm/SKILL.md with context: fork frontmatter"
+      },
+      {
+        "letter": "D",
+        "text": "/review in CLAUDE.md as a documented procedure, and /brainstorm in .claude/skills/ carrying only its own allowed-tools restrictions"
+      }
+    ],
+    "correct": "C",
+    "explain": {
+      "A": "Copy-paste manual ke tiap mesin = resep gagal. Team commands harusnya ship bareng repo.",
+      "B": "Brainstorm itu skill personal, bukan tim. Dan output verbose butuh context: fork biar nggak nutupin main conversation.",
+      "C": "Benar. /review = tim → .claude/commands/ (ikut repo). /brainstorm = personal → ~/.claude/skills/brainstorm/SKILL.md + frontmatter context: fork buat isolasi output panjang.",
+      "D": "Slash command itu bukan prosedur di CLAUDE.md — dan skills itu nggak cuma soal allowed-tools."
+    }
+  },
+  {
+    "id": "3.3",
+    "domainNum": 3,
+    "domainTitle": "Claude Code Configuration & Workflows",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-3-path-specific-rules",
+    "taskTitle": "Path-Specific Rules for Conditional Convention Loading",
+    "question": "A codebase has test files co-located with source files throughout 50+ directories (e.g., Button.test.tsx next to Button.tsx). The team wants all tests to follow the same conventions regardless of location. What is the most maintainable approach?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Add all the test conventions to the root CLAUDE.md file so they are loaded into context for every session"
+      },
+      {
+        "letter": "B",
+        "text": "Create a rule file in .claude/rules/ with YAML frontmatter paths: [\"**/*.test.tsx\", \"**/*.test.ts\"] holding the test conventions for the repo"
+      },
+      {
+        "letter": "C",
+        "text": "Place a CLAUDE.md file in every directory that contains test files, each carrying a copy of the team test conventions"
+      },
+      {
+        "letter": "D",
+        "text": "Create a skill in .claude/skills/ that includes the test conventions and instruct developers to invoke it before writing or editing any tests"
+      }
+    ],
+    "correct": "B",
+    "explain": {
+      "A": "Root CLAUDE.md ke-load di SEMUA sesi — test conventions numpuk di konteks pas ngeredit file non-test. Boros token.",
+      "B": "Benar. Satu rule file di .claude/rules/ dengan frontmatter paths: [\"**/*.test.tsx\", \"**/*.test.ts\"] — ke-load cuma pas nyentuh file test, ke-manage di satu tempat, work di seluruh 50+ direktori.",
+      "C": "Copy-paste CLAUDE.md ke puluhan direktori = maintenance nightmare. Satu perubahan = edit belasan file.",
+      "D": "Skill harus di-invoke manual — gampang kelewat. Konvensi wajib itu bukan tempatnya di skill."
+    }
+  },
+  {
+    "id": "3.4",
+    "domainNum": 3,
+    "domainTitle": "Claude Code Configuration & Workflows",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-4-plan-mode-execution",
+    "taskTitle": "Plan Mode vs Direct Execution",
+    "question": "Your team faces three tasks: (1) restructure a monolith into microservices, (2) fix a null pointer exception in a single function with a clear stack trace, (3) migrate from one logging library to another across 30 files. Which mode should be used for each?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Plan mode for (1) and (3), and direct execution for (2)"
+      },
+      {
+        "letter": "B",
+        "text": "Plan mode for all three, since they all involve code changes"
+      },
+      {
+        "letter": "C",
+        "text": "Direct execution for all three with comprehensive upfront instructions"
+      },
+      {
+        "letter": "D",
+        "text": "Plan mode only for (1), direct execution otherwise"
+      }
+    ],
+    "correct": "A",
+    "explain": {
+      "A": "Benar. (1) restrukturisasi monolith & (3) migrasi 30 file = arsitektur besar & multi-file → plan mode. (2) NPE satu fungsi dengan stack trace jelas → langsung eksekusi aja.",
+      "B": "Plan mode buat fix NPE satu baris = buang waktu. Sesuain mode sama kompleksitas.",
+      "C": "Langsung eksekusi buat restrukturisasi monolith? Di situ rencana justru paling dibutuhkan.",
+      "D": "Migrasi library ke 30 file juga butuh rencana — urutan, dependensi, verifikasi. Jangan cuma yang nomor satu."
+    }
+  },
+  {
+    "id": "3.5",
+    "domainNum": 3,
+    "domainTitle": "Claude Code Configuration & Workflows",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-5-iterative-refinement",
+    "taskTitle": "Iterative Refinement Techniques",
+    "question": "A developer describes a code transformation in prose. Claude Code interprets it differently each time, producing inconsistent results. What technique should the developer try first?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Provide 2-3 concrete input/output examples showing the exact before and after transformation"
+      },
+      {
+        "letter": "B",
+        "text": "Write a comprehensive test suite and iterate by sharing test failures"
+      },
+      {
+        "letter": "C",
+        "text": "Use the interview pattern to have Claude ask clarifying questions before implementing"
+      },
+      {
+        "letter": "D",
+        "text": "Rewrite the prose description with more precise language and technical terminology"
+      }
+    ],
+    "correct": "A",
+    "explain": {
+      "A": "Benar. Prosa ambigu itu sumber inkonsistensi. 2-3 contoh input/output konkret = determinis, murah, langsung ngepin behavior. Ladder guide: contoh dulu, baru test suite, baru interview pattern.",
+      "B": "Test suite itu rung kedua — bagus buat regresi, tapi pertama-tama coba contoh konkret dulu karena effort-nya paling kecil.",
+      "C": "Interview pattern buat ngejelasin requirement yang kurang konteks. Di sini requirement-nya jelas, cuma ambigu bentuknya — contoh lebih tepat.",
+      "D": "Prosa yang lebih presisi = tetap prosa. Model tetep bisa interpretasi beda-beda tiap run."
+    }
+  },
+  {
+    "id": "3.6",
+    "domainNum": 3,
+    "domainTitle": "Claude Code Configuration & Workflows",
+    "domainSlug": "3-claude-code-config",
+    "taskSlug": "3-6-cicd-integration",
+    "taskTitle": "CI/CD Integration",
+    "question": "A CI pipeline script runs claude with a prompt but the job hangs indefinitely. Logs show Claude Code is waiting for interactive input. What is the correct fix?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Set the environment variable CLAUDE_HEADLESS=true before running the command"
+      },
+      {
+        "letter": "B",
+        "text": "Add the --batch flag to enable batch processing mode"
+      },
+      {
+        "letter": "C",
+        "text": "Add the -p flag so Claude Code runs in non-interactive print mode"
+      },
+      {
+        "letter": "D",
+        "text": "Redirect stdin from /dev/null to prevent interactive prompts"
+      }
+    ],
+    "correct": "C",
+    "explain": {
+      "A": "CLAUDE_HEADLESS itu variabel env karangan — nggak ada di Claude Code.",
+      "B": "--batch itu flag karangan juga. Claude Code nggak punya flag segitu.",
+      "C": "Benar. Flag -p (print mode) itu cara resmi jalanin Claude Code non-interactive di CI: prompt diproses, output ke stdout, nggak nunggu input.",
+      "D": "Redirect /dev/null cuma nutup stdin — Claude Code tetep nunggu/atau error. Mode non-interactive-nya harus di-enable eksplisit."
+    }
+  },
+  {
+    "id": "4.1",
+    "domainNum": 4,
+    "domainTitle": "Prompt Engineering & Structured Output",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-1-system-prompts",
+    "taskTitle": "System Prompts with Explicit Criteria",
+    "question": "Your CI/CD code review pipeline has a 40% false positive rate on 'documentation mismatch' findings, causing developers to ignore ALL review categories including accurate security findings. What is the most effective fix?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Temporarily disable the documentation mismatch category while refining its prompts with explicit criteria and code examples"
+      },
+      {
+        "letter": "B",
+        "text": "Increase the model temperature to produce more varied review runs, then filter out findings that appear only once"
+      },
+      {
+        "letter": "C",
+        "text": "Add a second model pass that re-examines each documentation finding and discards any it cannot verify before the report reaches developers"
+      },
+      {
+        "letter": "D",
+        "text": "Add \"only report high-confidence documentation issues\" to the system prompt so the model filters its own weaker findings"
+      }
+    ],
+    "correct": "A",
+    "explain": {
+      "A": "Benar. 40% false positive di satu kategori ngeracunin trust ke SEMUA kategori — dev jadi nge-absahkan security finding yang beneran penting. Matiin kategori noisy selagi diperbaiki = protect trust dulu.",
+      "B": "Temperature naik + filter voting = mahal, rumit, dan nggak nyentuh root cause (kriteria 'documentation mismatch' yang lemah).",
+      "C": "Second pass nambah biaya & latency tiap run; yang dibutuhkan: matiin sumber noise selagi kriterianya dibenerin. Ini solusi pertama yang paling cepat ngembalikan trust.",
+      "D": "'Hanya report high-confidence' itu persis kalimat vague yang guide larang — nggak ada decision boundary yang bisa ditindaklanjuti model."
+    }
+  },
+  {
+    "id": "4.2",
+    "domainNum": 4,
+    "domainTitle": "Prompt Engineering & Structured Output",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-2-few-shot-prompting",
+    "taskTitle": "Few-Shot Prompting",
+    "question": "Your extraction pipeline correctly identifies research data in structured tables but returns empty fields when the same information appears in narrative paragraphs. Detailed instructions already specify all required fields and their formats. What should you try first?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Add a pre-processing step to convert all narrative text into structured tables before extraction"
+      },
+      {
+        "letter": "B",
+        "text": "Increase the model context window to process more of each document"
+      },
+      {
+        "letter": "C",
+        "text": "Add few-shot examples showing correct extraction from both structured tables and narrative paragraphs"
+      },
+      {
+        "letter": "D",
+        "text": "Add a post-processing retry that re-extracts any fields returned as empty"
+      }
+    ],
+    "correct": "C",
+    "explain": {
+      "A": "Pre-processing naratif → tabel = effort infra besar buat masalah yang bisa diselesaikan di level prompt.",
+      "B": "Konteks bukan masalahnya — info ADA di dokumen, model cuma gagal ngenalin polanya di format naratif.",
+      "C": "Benar. Few-shot dengan contoh dari KEDUA format (tabel & naratif) ngepin pattern extraction. Ini first step termurah & paling ngefek.",
+      "D": "Retry field kosong = nambah biaya & tetep sering gagal di dokumen yang sama. Perbaiki pemahaman modelnya, bukan bolak-balik doang."
+    }
+  },
+  {
+    "id": "4.3",
+    "domainNum": 4,
+    "domainTitle": "Prompt Engineering & Structured Output",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-3-structured-output",
+    "taskTitle": "Structured Output with Tool Use",
+    "question": "Your extraction system uses tool_use with a strict JSON schema where all fields are required. Testers report the model invents plausible-looking dates and monetary amounts when processing documents that lack this information. What is the best fix?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Make fields optional or nullable when source documents may not contain the information"
+      },
+      {
+        "letter": "B",
+        "text": "Switch from tool_use to prompt-based JSON extraction, which gives more flexibility in the output"
+      },
+      {
+        "letter": "C",
+        "text": "Add an instruction to the prompt telling the model that it must not hallucinate any values at all"
+      },
+      {
+        "letter": "D",
+        "text": "Add a post-extraction validation step that checks all values against the source document"
+      }
+    ],
+    "correct": "A",
+    "explain": {
+      "A": "Benar. Kalau semua field wajib, model DIPAKSA ngisi — datanya nggak ada, ya dia ngarang. Field opsional/nullable ngasih jalan keluar yang jujur.",
+      "B": "Pindah ke prompt-based JSON justru nambah risiko halusinasi — tool_use schema itu yang paling ketat.",
+      "C": "'Jangan ngarang' tanpa jalan keluar di schema = model tetep dipaksa ngisi field wajib. Instruksi kalah sama struktur.",
+      "D": "Validasi post-hoc ngedeteksi halusinasi, tapi nggak nyegah — pipeline jadi retry terus. Akar masalahnya di schema."
+    }
+  },
+  {
+    "id": "4.4",
+    "domainNum": 4,
+    "domainTitle": "Prompt Engineering & Structured Output",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-4-validation-retry-loops",
+    "taskTitle": "Validation, Retry, and Feedback Loops",
+    "question": "Your extraction pipeline validates that line item amounts sum to the stated total. For Document A, the calculated sum is £450 but the stated total is £500. For Document B, the 'department' field is missing entirely from the source text. Which retry strategy is correct?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Retry both documents with the validation errors, instructing the model to re-extract all fields"
+      },
+      {
+        "letter": "B",
+        "text": "Skip retries for both documents and flag them all for human review to ensure accuracy"
+      },
+      {
+        "letter": "C",
+        "text": "Retry Document A with the discrepancy error; flag Document B for human review since the information is absent from the source"
+      },
+      {
+        "letter": "D",
+        "text": "Retry both documents with the same prompt, since extraction is non-deterministic and may succeed on a second attempt"
+      }
+    ],
+    "correct": "C",
+    "explain": {
+      "A": "Doc B (field nggak ada di source) nggak mungkin ke-retry — model bakal ngarang department buat ngebantu validasi. Salah dua-duanya.",
+      "B": "Doc A bisa dibenerin otomatis (sum mismatch = selisih £50, kasih feedback buat re-extract). Buang-buang human review.",
+      "C": "Benar. Doc A: mismatch jumlah = validasi bisa kepulihin → retry dengan error spesifik. Doc B: informasi beneran absen dari source → nggak ada yang bisa di-retry → human review.",
+      "D": "'Coba-coba lagi karena non-deterministik' = lottery, bukan strategi. Doc B bakal gagal terus, Doc A butuh feedback spesifik."
+    }
+  },
+  {
+    "id": "4.5",
+    "domainNum": 4,
+    "domainTitle": "Prompt Engineering & Structured Output",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-5-batch-processing",
+    "taskTitle": "Batch Processing Strategies",
+    "question": "Your team wants to reduce API costs for automated analysis. You have two workflows: (1) a blocking pre-merge check that must complete before developers merge, and (2) a technical debt report generated overnight for review the next morning. Your manager proposes switching both to the Message Batches API for 50% cost savings. How should you evaluate this proposal?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Use batch processing for the technical debt reports only; keep real-time calls for pre-merge checks"
+      },
+      {
+        "letter": "B",
+        "text": "Switch both workflows to batch processing, with a timeout fallback to real-time if the batch takes too long"
+      },
+      {
+        "letter": "C",
+        "text": "Keep real-time calls for both workflows to avoid batch result ordering issues"
+      },
+      {
+        "letter": "D",
+        "text": "Switch both to batch processing with status polling to check for completion"
+      }
+    ],
+    "correct": "A",
+    "explain": {
+      "A": "Benar. Batch API = 50% lebih murah tapi hasil dateng dalam jam-jam. Debt report overnight? Cocok. Pre-merge check yang blocking? Wajib real-time — developer nggak mau nunggu berjam-jam buat merge.",
+      "B": "Batch + fallback timeout = kompleksitas ekstra dan pre-merge tetep kena delay pas batch-nya slow. Nggak worth it buat workflow blocking.",
+      "C": "Real-time buat debt report overnight = bayar full price buat job yang nggak deadline. Buang-buang uang.",
+      "D": "Status polling nggak ngubah satu hal pun: batch tetep butuh jam-jam. Pre-merge blocking tetep kena."
+    }
+  },
+  {
+    "id": "4.6",
+    "domainNum": 4,
+    "domainTitle": "Prompt Engineering & Structured Output",
+    "domainSlug": "4-prompt-engineering",
+    "taskSlug": "4-6-multi-pass-review",
+    "taskTitle": "Multi-Instance and Multi-Pass Review",
+    "question": "A pull request modifying 14 files receives inconsistent review: detailed feedback on some files, superficial comments on others, obvious bugs missed, and contradictory findings — the same pattern is flagged as problematic in one file but approved in another. How should you restructure the review?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Switch to a higher-tier model with a much larger context window so that all 14 files receive adequate attention within a single review pass"
+      },
+      {
+        "letter": "B",
+        "text": "Split into per-file local analysis passes for consistent depth, then run a separate cross-file integration pass for data flow issues"
+      },
+      {
+        "letter": "C",
+        "text": "Run three independent review passes over the full PR and only flag those issues that at least two of the three separate runs agree on"
+      },
+      {
+        "letter": "D",
+        "text": "Require developers to split large pull requests into smaller submissions of 3-4 files before the automated review runs"
+      }
+    ],
+    "correct": "B",
+    "explain": {
+      "A": "Model lebih gede = attention dilution tetep kejadian. Persis pola 1.6: konteks kebanyakan bikin perhatian menipis.",
+      "B": "Benar. Per-file local pass buat depth yang konsisten + cross-file integration pass buat data flow & finding kontradiktif. Ini resep multi-pass review yang disarankan guide.",
+      "C": "Voting 3 run full-PR = 3x biaya dan attention dilution kejadian di ketiga-tiganya. Mahal & tetep inconsistent.",
+      "D": "Nyerahkan beban ke developer (pecahin PR manual) = nggak nyekrup sistemnya. Sistem review-nya yang harus diperbaiki."
+    }
+  },
+  {
+    "id": "5.1",
+    "domainNum": 5,
+    "domainTitle": "Context Management & Reliability",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-1-context-window-management",
+    "taskTitle": "Context Window Management",
+    "question": "A customer support agent handles a multi-issue session. After several turns, the agent refers to 'your recent refund request' instead of the specific $247.83 refund for order #8891. The conversation history is being summarised between turns to manage context length. What is the most effective fix?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Instruct the model to preserve all numerical values verbatim whenever it summarises the conversation history"
+      },
+      {
+        "letter": "B",
+        "text": "Extract transactional facts (amounts, dates, order numbers) into a persistent case facts block included in every prompt, outside summarised history"
+      },
+      {
+        "letter": "C",
+        "text": "Store the full conversation history in an external database and retrieve the relevant turns on demand whenever the agent needs to recall an earlier detail"
+      },
+      {
+        "letter": "D",
+        "text": "Increase the context window size so the full conversation history fits and summarisation never needs to run"
+      }
+    ],
+    "correct": "B",
+    "explain": {
+      "A": "Instruksi 'jaga angka-angka' di summary = tetap probabilistik. Summary compress, angka bakal hilang di suatu titik — dan itu refund $247.83, bukan angka yang boleh hilang.",
+      "B": "Benar. Ekstrak fakta transaksional (amount, tanggal, order #) ke case facts block yang DI-INCLUDE di tiap prompt, di luar history yang disummarise. Fakta kritikal nggak pernah lewat summarization.",
+      "C": "Retrieve-on-demand nambah latency & retrieval bisa gagal pas paling dibutuhkan. Fakta yang diketahui kritikal itu dimasukin eksplisit, bukan dicari-cari.",
+      "D": "Window lebih gede cuma nunda masalah — percakapan panjang tetep melewati batas. Dan cost per call naik."
+    }
+  },
+  {
+    "id": "5.2",
+    "domainNum": 5,
+    "domainTitle": "Context Management & Reliability",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-2-escalation-ambiguity",
+    "taskTitle": "Escalation & Ambiguity Resolution",
+    "question": "A customer support agent achieves only 55% first-contact resolution, well below the 80% target. Logs show it escalates straightforward damage replacement cases while attempting to autonomously handle complex policy exception requests. What is the most effective improvement?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Add explicit escalation criteria to the system prompt with few-shot examples demonstrating when to escalate versus resolve autonomously"
+      },
+      {
+        "letter": "B",
+        "text": "Deploy a separate classifier model trained on historical tickets to predict which requests need escalation"
+      },
+      {
+        "letter": "C",
+        "text": "Implement sentiment analysis to detect customer frustration and automatically escalate when negative sentiment exceeds a threshold"
+      },
+      {
+        "letter": "D",
+        "text": "Have the agent self-report a confidence score (1-10) and automatically route to humans when confidence falls below a threshold"
+      }
+    ],
+    "correct": "A",
+    "explain": {
+      "A": "Benar. Kriteria eskalasi eksplisit (damage replacement = resolve; policy exception = escalate) + few-shot contoh = decision boundary yang bisa ditindaklanjuti. Inverted escalation dibenerin langsung.",
+      "B": "Classifier terpisah = infrastruktur baru + harus dilatih + maintenance. Over-engineered sebelum kriteria eksplisit dicoba.",
+      "C": "Sentiment bukan tanda kompleksitas — customer tenang pun bisa punya policy exception yang harusnya di-eskalasi.",
+      "D": "Self-reported confidence itu kalibrasi yang buruk — model yang salah juga bisa 'yakin'. Ini persis kalimat vague yang guide larang."
+    }
+  },
+  {
+    "id": "5.3",
+    "domainNum": 5,
+    "domainTitle": "Context Management & Reliability",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-3-error-propagation",
+    "taskTitle": "Error Propagation in Multi-Agent Systems",
+    "question": "A web search subagent in a multi-agent research system times out while researching a complex topic. You need to design how this failure information flows back to the coordinator. Which approach best enables intelligent recovery?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Catch the timeout and return an empty result set marked as successful, so the rest of the workflow carries on regardless of the failure"
+      },
+      {
+        "letter": "B",
+        "text": "Propagate the timeout exception to a top-level handler that terminates the entire research workflow at once, discarding everything"
+      },
+      {
+        "letter": "C",
+        "text": "Return structured error context including failure type, attempted query, partial results, and potential alternative approaches"
+      },
+      {
+        "letter": "D",
+        "text": "Implement automatic retry with exponential backoff, returning a generic search unavailable status only after all retries are exhausted"
+      }
+    ],
+    "correct": "C",
+    "explain": {
+      "A": "Empty-but-successful = koordinator buta. Dia ngira riset kelar padahal satu sumber gagal — silently suppressing error, antipattern eksplisit.",
+      "B": "Terminate semua workflow karena satu timeout = buang partial results dari sumber yang sukses. Over-reaction.",
+      "C": "Benar. Structured error context: failure type + attempted query + partial results + alternative approaches. Koordinator jadi bisa milih recovery cerdas (retry? sumber lain? catat gap?).",
+      "D": "Retry + backoff bagus di level subagent, tapi status generik 'search unavailable' setelah semua retry = koordinator nggak dapet konteks buat recover dengan cerdas."
+    }
+  },
+  {
+    "id": "5.4",
+    "domainNum": 5,
+    "domainTitle": "Context Management & Reliability",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-4-codebase-exploration",
+    "taskTitle": "Codebase Exploration & Context Degradation",
+    "question": "A developer productivity agent is exploring an unfamiliar codebase. After investigating several modules, it starts referencing 'typical repository patterns' instead of the specific class names and dependency chains it discovered earlier. What is the most effective mitigation?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Increase the model context window so that far more of the discovery output can be retained throughout the whole exploration"
+      },
+      {
+        "letter": "B",
+        "text": "Have the agent maintain scratchpad files recording key findings and reference them for subsequent questions"
+      },
+      {
+        "letter": "C",
+        "text": "Restart the session with a fresh context and ask the agent to explore the codebase more efficiently this time"
+      },
+      {
+        "letter": "D",
+        "text": "Pre-load the entire codebase structure into the initial context so exploration has less to rediscover"
+      }
+    ],
+    "correct": "B",
+    "explain": {
+      "A": "Window gede nunda degradasi, nggak nyegah. Exploration panjang tetep bikin detail awal memudar.",
+      "B": "Benar. Scratchpad file yang nyatet temuan kunci (nama class, dependency chain) = memori eksternal yang bisa di-refer kapan pun. Detail nggak ikut memudar bareng konteks.",
+      "C": "Restart + 'coba lebih efisien' = semua temuan hilang & nggak ada jaminan lebih baik.",
+      "D": "Pre-load seluruh struktur = bantai context budget di awal; detail isi class tetep harus di-explore. Justru mpercepat penuhnya konteks."
+    }
+  },
+  {
+    "id": "5.5",
+    "domainNum": 5,
+    "domainTitle": "Context Management & Reliability",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-5-human-review-calibration",
+    "taskTitle": "Human Review & Confidence Calibration",
+    "question": "A structured data extraction system achieves 97% overall accuracy across all document types. The team proposes automating all extractions where model confidence exceeds 95% to reduce human review costs. What is the critical risk in this approach?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Automated extractions should always receive human review regardless of the confidence score, which makes the proposal fundamentally flawed no matter where the threshold is set"
+      },
+      {
+        "letter": "B",
+        "text": "The 95% confidence threshold is too low for automation and should be raised to 99% before any extractions bypass human review"
+      },
+      {
+        "letter": "C",
+        "text": "The model will become overconfident as it processes more documents over time, so the system will require regular retraining to stay calibrated"
+      },
+      {
+        "letter": "D",
+        "text": "Aggregate accuracy may mask poor performance on specific document types or fields, and confidence scores need calibration against labelled validation sets before use"
+      }
+    ],
+    "correct": "D",
+    "explain": {
+      "A": "'Review semua' = nggak efisien juga, tapi bukan itu critical risk-nya. Confusion-based routing itu praktik standar — yang salah di sini adalah angka 95% yang dipakai mentah-mentah.",
+      "B": "Threshold 99% juga bakal salah kalau skornya nggak dikalibrasi. Angka mentah confidence bukan probabilitas error sebenarnya.",
+      "C": "Overconfidence-over-time itu spekulasi; yang terukur dan langsung di soal ini: agregat 97% nutupin performa per-tipe-dokumen.",
+      "D": "Benar. Akurasi agregat 97% bisa nyembunyiin tipe dokumen/field tertentu yang akurasinya 80-an. Confidence score harus dikalibrasi dulu terhadap labelled validation set sebelum jadi dasar skip review."
+    }
+  },
+  {
+    "id": "5.6",
+    "domainNum": 5,
+    "domainTitle": "Context Management & Reliability",
+    "domainSlug": "5-context-management",
+    "taskSlug": "5-6-information-provenance",
+    "taskTitle": "Information Provenance & Multi-Source Synthesis",
+    "question": "A multi-agent research system produces a synthesis report on market trends. Two credible sources report different growth rates: Source A reports 12% growth (2023 data) and Source B reports 8% growth (2024 data). The synthesis agent currently selects the more recent value. What is the correct approach?",
+    "options": [
+      {
+        "letter": "A",
+        "text": "Flag the conflict and escalate it to a human researcher for resolution before including either of the two figures in the final report"
+      },
+      {
+        "letter": "B",
+        "text": "Average the two values and report 10% growth, with a footnote recording the variance between the two sources"
+      },
+      {
+        "letter": "C",
+        "text": "Always use the most recent source, since the later publication date makes it the more reliable reflection of current market conditions"
+      },
+      {
+        "letter": "D",
+        "text": "Annotate both values with source attribution and publication dates, letting the consumer decide how to interpret the difference"
+      }
+    ],
+    "correct": "D",
+    "explain": {
+      "A": "Eskalasi tiap konflik data = human bottleneck. Konflik antar sumber itu normal di riset — sistem harusnya bisa nanganin dengan atribusi.",
+      "B": "Ngasih rata-rata 12% & 8% = ngarang angka yang nggak diklaim sumber mana pun. Fabrication halus.",
+      "C": "Langganan terbaru bisa aja salah metodologi — dan nilainya beda konteks (2023 vs 2024). Sekali lagi: memilih diam-diam = nyembunyiin konflik.",
+      "D": "Benar. Annotate kedua nilai + atribusi + tanggal publikasi = provenance utuh. Konsumen laporan bisa nilain sendiri. Provenance = transparansi, bukan pemilihan senyap."
+    }
+  }
+]
