@@ -24,7 +24,7 @@ di `localStorage`. Artinya bisa di-hosting di tier gratis mana pun.
 
 ## Struktur konten
 
-Konten mentah hasil scraping ada di **root repo** sebagai `*.md` (5 file domain + 30 file task).
+Konten mentah hasil scraping ada di folder **`materi/`** sebagai `*.md` (5 file domain overview + 30 file task + 5 file domain).
 Itu **source of truth** dan wajib ikut ter-commit — jangan dihapus.
 
 `scripts/build-content.mjs` mem-parse file-file itu jadi JSON terstruktur lalu menulis ke dua tempat:
@@ -103,7 +103,7 @@ Setiap push ke branch `main` bakal auto-deploy ke production; branch lain jadi p
 
 ### Catatan build di Vercel
 
-- File `*.md` di root **harus ada** saat build, karena `npm run build` jalanin generator konten dulu.
+- File `*.md` di `materi/` **harus ada** saat build, karena `npm run build` jalanin generator konten dulu.
 - Nggak ada env var yang wajib — build tetap sukses walau semuanya kosong.
 - `images.unoptimized: true` di `next.config.mjs` sengaja diset karena app ini nggak pakai
   image optimization (biar nggak butuh Image Optimization API).

@@ -1,6 +1,6 @@
 /**
  * build-content.mjs
- * Parse raw scraped .md files (27 tasks + 5 domain overviews) into structured JSON.
+ * Parse raw scraped .md files in materi/ (30 tasks + 5 domain overviews + 5 domain files) into structured JSON.
  * Cleans site chrome, splits sections, joins with curated answer key.
  *
  * Usage: node scripts/build-content.mjs [--dump-scenarios]
@@ -10,6 +10,7 @@ import { join } from "node:path";
 import { ANSWER_KEY } from "./answer-key.mjs";
 
 const ROOT = process.cwd();
+const MATERI_DIR = join(ROOT, "materi");
 const OUT_DIR = join(ROOT, "content");
 mkdirSync(OUT_DIR, { recursive: true });
 
@@ -287,7 +288,7 @@ function parseDomainFile(raw, domainSlug) {
 }
 
 // ---------------- main ----------------
-const files = readdirSync(ROOT).filter((f) => f.endsWith(".md"));
+const files = readdirSync(MATERI_DIR).filter((f) => f.endsWith(".md"));
 
 const domainFiles = files.filter((f) => /^\d-[a-z-]+\.md$/.test(f));
 const taskFiles = files.filter((f) => /^\d-[a-z-]+_\d+-\d+.*\.md$/.test(f));
@@ -295,7 +296,7 @@ const taskFiles = files.filter((f) => /^\d-[a-z-]+_\d+-\d+.*\.md$/.test(f));
 const domains = [];
 for (const f of domainFiles) {
   const slug = f.replace(/\.md$/, "");
-  try { domains.push(parseDomainFile(readFileSync(join(ROOT, f), "utf8"), slug)); }
+  try { domains.push(parseDomainFile(readFileSync(join(MATERI_DIR, f), "utf8"), slug)); }
   catch (e) { console.warn(`[warn] failed parsing domain ${f}: ${e.message}`); }
 }
 domains.sort((a, b) => a.num - b.num);
@@ -303,7 +304,7 @@ domains.sort((a, b) => a.num - b.num);
 const tasks = [];
 for (const f of taskFiles.sort()) {
   const [domainSlug, taskSlug] = f.replace(/\.md$/, "").split("_");
-  try { tasks.push(parseTaskFile(readFileSync(join(ROOT, f), "utf8"), domainSlug, taskSlug)); }
+  try { tasks.push(parseTaskFile(readFileSync(join(MATERI_DIR, f), "utf8"), domainSlug, taskSlug)); }
   catch (e) { console.warn(`[warn] failed parsing task ${f}: ${e.message}`); }
 }
 
