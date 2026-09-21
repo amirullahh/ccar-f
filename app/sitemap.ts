@@ -2,7 +2,19 @@ import type { MetadataRoute } from "next";
 import { tasks } from "@/lib/data";
 import { getDomains } from "@/lib/curriculum";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://claude-exam-guide.vercel.app";
+const DEFAULT_SITE_URL = "https://claude-exam-guide.vercel.app";
+
+function resolveSiteUrl(): string {
+  const raw = (process.env.NEXT_PUBLIC_SITE_URL ?? "").trim();
+  if (!raw) return DEFAULT_SITE_URL;
+  try {
+    return new URL(raw).toString().replace(/\/$/, "");
+  } catch {
+    return DEFAULT_SITE_URL;
+  }
+}
+
+const BASE = resolveSiteUrl();
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const statics = [

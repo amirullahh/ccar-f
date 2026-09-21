@@ -4,7 +4,19 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://claude-exam-guide.vercel.app";
+const DEFAULT_SITE_URL = "https://claude-exam-guide.vercel.app";
+
+function resolveSiteUrl(): string {
+  const raw = (process.env.NEXT_PUBLIC_SITE_URL ?? "").trim();
+  if (!raw) return DEFAULT_SITE_URL;
+  try {
+    return new URL(raw).toString().replace(/\/$/, "");
+  } catch {
+    return DEFAULT_SITE_URL;
+  }
+}
+
+const SITE_URL = resolveSiteUrl();
 const SITE_NAME = "Claude Exam Guide ID";
 
 export const metadata: Metadata = {
